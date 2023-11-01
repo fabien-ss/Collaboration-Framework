@@ -17,8 +17,9 @@ public class Main {
      */
     public static void main(String[] args) {
         try{
-            Connection connection = new DbConnection().connect();
-            System.out.println(connection);
+//            Connection connection = new DbConnection().connect();
+//            int bb = 8;
+//            System.out.println(bb.class);
         }catch(Exception e){
             e.printStackTrace();
         }

@@ -29,37 +29,37 @@ public class BddObject {
             System.out.println(con);
             state = true;
         }
-        List<T> list = new ArrayList<T>();
-        String query = "SELECT * FROM " + Helper.getTableName(this);
+        List<T> list = new ArrayList<>();
+//        String query = "SELECT * FROM test";
 //        System.out.println(query);
-        Statement stmt = con.createStatement();
-        ResultSet rs = stmt.executeQuery(query);
-        ResultSetMetaData rsmd = rs.getMetaData();
-        while (rs.next()) {
-            T temp = (T)this.getClass().getDeclaredConstructor().newInstance((Object[]) null);
-            List<Field> attribut = Helper.getColumnFields(temp);
-            for (int col = 1; col <= rsmd.getColumnCount(); col++) {
-                Class<?> fieldType = attribut.get(col-1).getType();
-                if(fieldType.getName().equals("java.time.LocalDateTime")){
-                    Timestamp tempo = rs.getTimestamp(col);
-                    if( tempo != null){
-                        temp.getClass().getDeclaredMethod("set" + Helper.capitalize(attribut.get(col-1).getName()) , fieldType ).invoke( temp , tempo.toLocalDateTime());
-                    }
-                }else if(fieldType.getName().equals("java.sql.Date")){
-                    temp.getClass().getDeclaredMethod("set" + Helper.capitalize(attribut.get(col-1).getName()) , fieldType ).invoke( temp , Date.valueOf(rs.getString(col)));
+//        Statement stmt = con.createStatement();
+//        ResultSet rs = stmt.executeQuery(query);
+//        ResultSetMetaData rsmd = rs.getMetaData();
+//        while (rs.next()) {
+//            T temp = (T)this.getClass().getDeclaredConstructor().newInstance((Object[]) null);
+//            List<Field> attribut = Helper.getColumnFields(temp);
+//            for (int col = 1; col <= rsmd.getColumnCount(); col++) {
+//                Class<?> fieldType = attribut.get(col-1).getType();
+//                if(fieldType.getName().equals("java.time.LocalDateTime")){
+//                    Timestamp tempo = rs.getTimestamp(col);
+//                    if( tempo != null){
+//                        temp.getClass().getDeclaredMethod("set" + Helper.capitalize(attribut.get(col-1).getName()) , fieldType ).invoke( temp , tempo.toLocalDateTime());
+//                    }
+//                }else if(fieldType.getName().equals("java.sql.Date")){
+//                    temp.getClass().getDeclaredMethod("set" + Helper.capitalize(attribut.get(col-1).getName()) , fieldType ).invoke( temp , Date.valueOf(rs.getString(col)));
 //                }else if(fieldType.getName().equals("etu2060.framework.FileUpload")){
 //                    FileUpload fu = new FileUpload();
 //                    fu.setName(rs.getString(col));
 //                    temp.getClass().getDeclaredMethod("set" + Helper.capitalize(attribut.get(col-1).getName()) , fieldType ).invoke( temp , fu);
-                }
-                else{
-                    Object args = fieldType.getDeclaredConstructor(String.class).newInstance(rs.getString(col));
-                    System.out.println(args);
-                    temp.getClass().getDeclaredMethod("set" + Helper.capitalize(attribut.get(col-1).getName()) , fieldType ).invoke( temp , args );
-                }
-            }
-            list.add(temp);
-        }
+//                }
+//                else{
+//                    Object args = fieldType.getDeclaredConstructor(String.class).newInstance(rs.getString(col));
+//                    System.out.println(args);
+//                    temp.getClass().getDeclaredMethod("set" + Helper.capitalize(attribut.get(col-1).getName()) , fieldType ).invoke( temp , args );
+//                }
+//            }
+//            list.add(temp);
+//        }
         if( state == true) con.close();
         return list;
 
