@@ -19,4 +19,5 @@ public @interface PrimaryKey {
     String prefix();
     String sequence();
     int length(); 
+    int prefixLength();
 }

@@ -7,6 +7,9 @@ package utils;
 import annotation.Table;
 import annotation.Column;
 import annotation.PrimaryKey;
+
+import dao.BddObject;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -32,21 +35,17 @@ public class DaoUtility {
     //COLUMN
     public static List<Field> getColumnFields(Object obj){
         List<Field> lst = new ArrayList<>();
-        for(Field declaredField : obj.getClass().getDeclaredFields()) {
-            if (declaredField.isAnnotationPresent(Column.class)) {
-                lst.add(declaredField);
+        Class objClass = obj.getClass();
+        while(objClass != BddObject.class){
+            for(Field declaredField : objClass.getDeclaredFields()) {
+                if (declaredField.isAnnotationPresent(Column.class)) {
+                    lst.add(declaredField);
+                }
             }
+            objClass = objClass.getSuperclass();
         }
-        return lst;
+            return lst;
     }
-    
-    
-    
-    /*
-        @Column(name="")
-    *   Integer anarana;
-    
-    */
     
     public static String getName( Field field ){
         if( field.isAnnotationPresent(Column.class) && !field.getAnnotation(Column.class).name().isEmpty() ){
@@ -108,12 +107,13 @@ public class DaoUtility {
         return null;
     }
     public static String[] getPrimaryKeyDetails(Object obj) throws Exception{
-        String[] lst = new String[3];
+        String[] lst = new String[4];
         Field field = getPrimaryKeyField(obj);
         PrimaryKey pk = field.getAnnotation(PrimaryKey.class);
         lst[0] = pk.prefix();
         lst[1] = pk.sequence();
         lst[2] = ""+pk.length();
+        lst[3] = ""+pk.prefixLength();
         return lst;
     }
     //OTHERS (GETTERS AND SETTERS)
@@ -134,6 +134,10 @@ public class DaoUtility {
         for(int i=0; i<list.size(); i++)
             res[i] = obj.getClass().getDeclaredMethod("set" + capitalize(list.get(i).getName()), list.get(i).getType());
         return res;
+    }
+
+    public static String fillZero(int parseInt, int parseInt0, String string) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
     
 }

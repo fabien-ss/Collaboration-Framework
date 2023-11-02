@@ -21,6 +21,7 @@ public class Main {
                 System.out.println(elt.getId()+" "+elt.getText()+" "+elt.getDate()+" "+elt.getDateheure());
             }
             
+            
         }catch(Exception e){
             e.printStackTrace();
         }

@@ -57,16 +57,24 @@ public class DbConnection {
     
     //FUNCTION 
     public void readFile()throws Exception{
-        List<String[]> lst = FileParser.readFile("E:\\ITU\\Collaboration-Framework\\DAO\\application.conf");
+        String confFile = System.getProperty("user.dir") + "\\database.conf";
+        List<String[]> lst = FileParser.readFile(confFile);
         for(String[] elt : lst ){
-            if(elt[0].equals("datasource")){
-                setDatasource(elt[1]);
-            }else if(elt[0].equals("driver")){
-                setDriver(elt[1]);
-            }else if(elt[0].equals("username")){
-                setUsername(elt[1]);
-            }else if(elt[0].equals("password")){
-                setPassword(elt[1]);
+            switch (elt[0]) {
+                case "datasource":
+                    setDatasource(elt[1]);
+                    break;
+                case "driver":
+                    setDriver(elt[1]);
+                    break;
+                case "username":
+                    setUsername(elt[1]);
+                    break;
+                case "password":
+                    setPassword(elt[1]);
+                    break;
+                default:
+                    break;
             }
         }
     }
