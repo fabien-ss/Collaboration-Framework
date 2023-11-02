@@ -18,6 +18,7 @@ import static utils.ObjectUtility.capitalize;
  * @author Mamisoa
  */
 public class DaoUtility {
+    
     //TABLE
     public static String getTableName(Object obj){
         if(obj.getClass().isAnnotationPresent(Table.class)){
@@ -39,6 +40,21 @@ public class DaoUtility {
         return lst;
     }
     
+    
+    
+    /*
+        @Column(name="")
+    *   Integer anarana;
+    
+    */
+    
+    public static String getName( Field field ){
+        if( field.isAnnotationPresent(Column.class) && !field.getAnnotation(Column.class).name().isEmpty() ){
+            return field.getAnnotation(Column.class).name();
+        }
+        return field.getName();
+    }
+    
     public static String[] getColumns(Object obj){
         List<Field> lst = getColumnFields(obj);
         String[] list = new String[lst.size()];
@@ -54,14 +70,12 @@ public class DaoUtility {
     
     public static String getListColumns(Object obj){
         String[] lst = getColumns(obj);
-        String res = "("; 
-        for(int i = 0; i < lst.length; i++){
-            res += lst[i];
-            if(i < lst.length -1){
-                res += ",";
-            }
+        String res = " ("; 
+        for(String elt : lst){
+            res += elt+",";
         }
-        return res;
+        res = res.substring(0, res.lastIndexOf(','));
+        return res+")";
     }
     
     //PRIMARY KEY

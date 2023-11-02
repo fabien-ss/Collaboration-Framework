@@ -4,8 +4,7 @@
  */
 package test;
 
-import java.sql.Connection;
-import dao.DbConnection;
+import java.util.List;
 /**
  *
  * @author Mamisoa
@@ -17,9 +16,11 @@ public class Main {
      */
     public static void main(String[] args) {
         try{
-//            Connection connection = new DbConnection().connect();
-//            int bb = 8;
-//            System.out.println(bb.class);
+            List<Test> lst = new Test().findAll(null);
+            for( Test elt : lst){
+                System.out.println(elt.getId()+" "+elt.getText()+" "+elt.getDate()+" "+elt.getDateheure());
+            }
+            
         }catch(Exception e){
             e.printStackTrace();
         }
