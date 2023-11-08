@@ -4,6 +4,9 @@
  */
 package utils;
 
+import java.lang.reflect.Array;
+import java.util.List;
+
 /**
  *
  * @author Mamisoa
@@ -20,5 +23,16 @@ public class ObjectUtility {
             num = zero+num;
         }
         return num;
+    }
+    public static <T> T[] toArray(List<T> list, T obj){
+//        Object array = Array.newInstance(obj.getClass(), list.size());
+        Object[] array = new Object[list.size()];
+        for(int i = 0; i < list.size(); i++){
+            T temp = (T) list.get(i);
+            Array.set(array, i, temp);
+        }
+        T[] res = (T[]) array;
+        return res;
+        
     }
 }
