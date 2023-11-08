@@ -4,7 +4,10 @@
  */
 package test;
 
+import java.util.ArrayList;
 import java.util.List;
+import utils.ObjectUtility;
+
 /**
  *
  * @author Mamisoa
@@ -20,6 +23,14 @@ public class Main {
             for( Test elt : lst){
                 System.out.println(elt.getId()+" "+elt.getText()+" "+elt.getDate()+" "+elt.getDateheure());
             }
+//            List<String> lst = new ArrayList<>();
+//            lst.add("huhu");
+//            lst.add("hoho");
+//            lst.add("1");
+//            lst.add("2");
+//            Integer[] array = ObjectUtility.toArray(lst, new String("string"));
+//            for(Integer elt : array)
+//                System.out.println(elt);
             
             
         }catch(Exception e){

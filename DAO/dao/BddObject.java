@@ -4,16 +4,18 @@
  */
 package dao;
 
+import java.sql.Connection;
+import java.sql.Statement;
+import java.sql.ResultSet;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.Statement;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import utils.DaoUtility;
+import utils.ObjectUtility;
 
 /**
  *
@@ -118,7 +120,6 @@ public class BddObject<T>  {
             state = true;
         }
         String query = "SELECT * FROM " + DaoUtility.getTableName(this);
-        System.out.println(con);
         List<T> list = this.fetch(con, query);
         if( state == true) con.close();
         return list;
@@ -163,7 +164,7 @@ public class BddObject<T>  {
     
     public List<T> fetch( Connection con, String query ) throws Exception{
         List<T> list = new ArrayList<>();
-        System.out.println(query);
+//        System.out.println(query);
         Statement stmt = con.createStatement();
         ResultSet rs = stmt.executeQuery(query);
         List<Field> fields = DaoUtility.getColumnFields(this.getClass());
@@ -172,6 +173,7 @@ public class BddObject<T>  {
             T now = this.convertToObject(rs, fields, methods);
             list.add(now);
         }
+//        return (T[])ObjectUtility.toArray(list, (T)this.getClass().getDeclaredConstructor().newInstance((Object[]) null));
         return list;
     }
     
