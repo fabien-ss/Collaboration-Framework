@@ -1,27 +1,11 @@
-@echo off
-set "frameworkCodePATH=%USERPROFILE%\ITU\Mr_Naina\Framework\Framework"
-set "lib=%USERPROFILE%\Documents\LIBRARY"
-
-cd /d "%frameworkCodePATH%"
-
-for /r %%i in (*.java) do (
-    echo %%i >> src.txt
-)
-
+@REM set "lib=E:\LIBRARY"
+Get-ChildItem -Recurse -Filter "*.java" | ForEach-Object { $_.FullName } > src.txt
 mkdir temp
-
-javac -cp "%lib%\servlet-api.jar;%lib%\gson.jar" -d temp @src.txt
-
+$src = Get-Content src.txt
+javac --source 8 --target 8 -d temp $src
 del src.txt
-
-copy "%lib%\gson.jar" temp\gson.jar
-
 cd temp
-
-jar -cf ..\framework.jar .
-
+jar -cf ..\DAO.jar .
 cd ..
-
-rmdir /s /q temp
-
-move framework.jar "%lib%"
+del -Recurse temp
+@REM move DAO.jar "%lib%"
