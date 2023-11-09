@@ -32,7 +32,7 @@ public class BddObject<T>  {
         String query = "INSERT INTO "+DaoUtility.getTableName(this)+DaoUtility.getListColumns(this)+" VALUES (";
         List<Method> lst = DaoUtility.getAllGettersMethod(this);
         for(Method method : lst){
-            if(method.equals(DaoUtility.getPrimaryKeyGetMethod(this)))
+            if(method.equals(DaoUtility.getPrimaryKeyGetMethod(this)) && method.invoke((Object[]) null).equals(null))
                 query += "'" + this.constructPK(con) + "'";       
             Class returnParam = method.getReturnType();
             if(returnParam.equals(java.sql.Date.class))
