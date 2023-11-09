@@ -15,7 +15,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import utils.DaoUtility;
-import utils.ObjectUtility;
 
 /**
  *
@@ -134,7 +133,7 @@ public class BddObject<T>  {
         String query = "SELECT * FROM " + DaoUtility.getTableName(this) + " WHERE " + DaoUtility.getPrimaryKeyName(this) + " = '" + id + "'";
         T obj = this.fetch(con, query).get(0);
         if( state == true) con.close();
-        return obj;
+        return (T) obj;
     }
     
     //OTHERS
@@ -164,7 +163,6 @@ public class BddObject<T>  {
     
     public List<T> fetch( Connection con, String query ) throws Exception{
         List<T> list = new ArrayList<>();
-//        System.out.println(query);
         Statement stmt = con.createStatement();
         ResultSet rs = stmt.executeQuery(query);
         List<Field> fields = DaoUtility.getColumnFields(this.getClass());
@@ -173,7 +171,6 @@ public class BddObject<T>  {
             T now = this.convertToObject(rs, fields, methods);
             list.add(now);
         }
-//        return (T[])ObjectUtility.toArray(list, (T)this.getClass().getDeclaredConstructor().newInstance((Object[]) null));
         return list;
     }
     
@@ -192,6 +189,7 @@ public class BddObject<T>  {
         Object object = this.getClass().getDeclaredConstructor().newInstance();
         for( int i = 0; i < fields.size() ; i++ ){
             String name = DaoUtility.getName(fields.get(i));
+            System.out.println(name);
             Method method = methods.get(i);
             Object value = resultSet.getObject( name , fields.get(i).getType());
             method.invoke(object, value);

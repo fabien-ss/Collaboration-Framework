@@ -81,7 +81,6 @@ public class DbConnection {
     
     public Connection connect()throws Exception{
         readFile(); 
-        System.out.println("HAHAHAHAH");
         Class.forName(getDriver());
         Connection con = DriverManager.getConnection(getDatasource(),getUsername(),getPassword());
         return con;
