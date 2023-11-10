@@ -8,4 +8,4 @@ cd temp
 jar -cf ..\DAO.jar .
 cd ..
 del -Recurse temp
-@REM move DAO.jar "%lib%"
+@REM mv -Force DAO.jar "%lib%" 

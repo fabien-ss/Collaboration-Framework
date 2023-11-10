@@ -93,7 +93,15 @@ public class DaoUtility {
         List<Field> lst = getColumnFields(obj.getClass());
         for(Field elt : lst){
             if(elt.isAnnotationPresent(PrimaryKey.class))
-               return obj.getClass().getMethod("get" + ObjectUtility.capitalize(elt.getName()));
+               return obj.getClass().getDeclaredMethod("get" + ObjectUtility.capitalize(elt.getName()), (Class[]) null);
+        }
+        return null;
+    }
+    public static Method setPrimaryKey(Object obj) throws Exception{
+        List<Field> lst = getColumnFields(obj.getClass());
+        for(Field elt : lst){
+            if(elt.isAnnotationPresent(PrimaryKey.class))
+               return obj.getClass().getDeclaredMethod("set" + ObjectUtility.capitalize(elt.getName()), elt.getType());
         }
         return null;
     }
@@ -121,9 +129,9 @@ public class DaoUtility {
         List<Method> res = new ArrayList<>();
         for(Field field : list){
             if( field.getType().equals(boolean.class))
-               res.add(obj.getDeclaredMethod("is" + capitalize(field.getName()), field.getType())); 
+               res.add(obj.getDeclaredMethod("is" + capitalize(field.getName()),  (Class[])null)); 
             else
-                res.add(obj.getDeclaredMethod("get" + capitalize(field.getName()), field.getType()));
+                res.add(obj.getDeclaredMethod("get" + capitalize(field.getName()),  (Class[])null));
         }
         return res;
     }
@@ -153,9 +161,4 @@ public class DaoUtility {
         }
         return res;
     }
-
-    public static String fillZero(int parseInt, int parseInt0, String string) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
-    
 }
