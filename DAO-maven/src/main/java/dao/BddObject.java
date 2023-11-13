@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import utils.DaoUtility;
+import utils.ObjectUtility;
 
 /**
  *
@@ -32,14 +33,16 @@ public class BddObject<T>  {
         String query = "INSERT INTO "+DaoUtility.getTableName(this)+DaoUtility.getListColumns(this)+" VALUES (";
         List<Method> lst = DaoUtility.getAllGettersMethod(this);
         for(Method method : lst){
-            if(method.equals(DaoUtility.getPrimaryKeyGetMethod(this)) && method.invoke((Object[]) null).equals(null))
-                query += "'" + this.constructPK(con) + "'";       
-            Class returnParam = method.getReturnType();
-            if(returnParam.equals(java.sql.Date.class))
-                query += "TO_DATE('" + method.invoke(this, (Object[]) null) + "','YYYY-MM-DD')";
+            Class<?> returnParam = method.getReturnType();
+            if(method.equals(DaoUtility.getPrimaryKeyGetMethod(this)) && method.invoke(this, (Object[]) null) == null){
+                DaoUtility.setPrimaryKey(this).invoke(this, this.constructPK(con));     
+                query += "'" + DaoUtility.getPrimaryKeyGetMethod(this).invoke(this, (Object[]) null) + "'";  
+            }
+            else if(returnParam.equals(java.sql.Date.class))
+                query += "TO_DATE('" + method.invoke(this, (Object[]) null) + "', 'YYYY-MM-DD')";
             else
                 query += "'" + method.invoke(this, (Object[]) null) + "'"; 
-            query = query + ",";
+            query = query + ", ";
         }
         query = query.substring(0, query.lastIndexOf(','));
         query = query + ")";
@@ -68,7 +71,7 @@ public class BddObject<T>  {
             state = true;
         }
         String query = "DELETE FROM " + DaoUtility.getTableName(this)+" WHERE " + DaoUtility.getPrimaryKeyName(this)  +" = '" + id +"'";
-//        System.out.println(query);
+       System.out.println(query);
         Statement stmt = con.createStatement();
         stmt.executeUpdate(query);
         if( state == true) con.close();
@@ -80,7 +83,7 @@ public class BddObject<T>  {
             state = true;
         }
         String query = "DELETE FROM " + DaoUtility.getTableName(this) + " WHERE " + condition;
-//        System.out.println(query);
+       System.out.println(query);
         Statement stmt = con.createStatement();
         stmt.executeUpdate(query);
         if( state == true) con.close();
@@ -106,7 +109,7 @@ public class BddObject<T>  {
         }
         query = query.substring(0, query.lastIndexOf(','));
         query += " WHERE " + DaoUtility.getTableName(this) +" = '" + DaoUtility.getPrimaryKeyGetMethod(this).invoke( this, (Object[]) null)+"'";
-//        System.out.println(query);
+       System.out.println(query);
         Statement stmt = con.createStatement();
         stmt.executeUpdate(query);
         if( state == true) con.close();
@@ -132,8 +135,22 @@ public class BddObject<T>  {
         }
         String query = "SELECT * FROM " + DaoUtility.getTableName(this) + " WHERE " + DaoUtility.getPrimaryKeyName(this) + " = '" + id + "'";
         T obj = this.fetch(con, query).get(0);
+        System.out.println(query);
         if( state == true) con.close();
         return (T) obj;
+    }
+    
+    public List<T> findWhere(Connection con, String condition) throws Exception {
+        boolean state = false;
+        if(con == null){
+            con = new DbConnection().connect();
+            state = true;
+        }
+        String query = "SELECT * FROM " + DaoUtility.getTableName(this) + " WHERE " + condition;
+        System.out.println(query);
+        List<T> lst = this.fetch(con, query);
+        if( state == true) con.close();
+        return lst;
     }
     
     //OTHERS
@@ -148,8 +165,12 @@ public class BddObject<T>  {
         if( state == true) con.close();
     }
     public List<T> executeQuery(Connection con, String query, Object obj) throws Exception{
+        boolean state = false;
+        if(con == null){
+            con = new DbConnection().connect();
+            state = true;
+        }
         List<T> list = new ArrayList<>();
-        System.out.println(query);
         Statement stmt = con.createStatement();
         ResultSet rs = stmt.executeQuery(query);
         List<Field> fields = DaoUtility.getColumnFields(obj.getClass());
@@ -158,6 +179,7 @@ public class BddObject<T>  {
             T now = this.convertToObject(rs, fields, methods, obj);
             list.add(now);
         }
+        if( state == true) con.close();
         return list;
     }
     
@@ -189,7 +211,7 @@ public class BddObject<T>  {
         Object object = this.getClass().getDeclaredConstructor().newInstance();
         for( int i = 0; i < fields.size() ; i++ ){
             String name = DaoUtility.getName(fields.get(i));
-            System.out.println(name);
+            // System.out.println(name);
             Method method = methods.get(i);
             Object value = resultSet.getObject( name , fields.get(i).getType());
             method.invoke(object, value);
@@ -207,7 +229,7 @@ public class BddObject<T>  {
         Statement stmt = con.createStatement();
         ResultSet rs = stmt.executeQuery("SELECT nextval('" + detail[1] + "')");
         rs.next();
-        String isa = DaoUtility.fillZero(Integer.parseInt(detail[2]), Integer.parseInt(detail[3]), rs.getString(1));
+        String isa = ObjectUtility.fillZero(Integer.parseInt(detail[2]), Integer.parseInt(detail[3]), rs.getString(1));
         if(state == true) con.close();
         return detail[0]+isa;
     }
