@@ -5,6 +5,7 @@
 package utils;
 
 import java.lang.reflect.Array;
+import java.text.DecimalFormat;
 import java.util.List;
 
 /**
@@ -25,7 +26,6 @@ public class ObjectUtility {
         return num;
     }
     public static <T> T[] toArray(List<T> list, T obj){
-//        Object array = Array.newInstance(obj.getClass(), list.size());
         Object[] array = new Object[list.size()];
         for(int i = 0; i < list.size(); i++){
             T temp = (T) list.get(i);
@@ -35,4 +35,68 @@ public class ObjectUtility {
         return res;
         
     }
+    public static String formatNumber(Double value, String separation){
+        DecimalFormat df = new DecimalFormat( "#,###,###,##0.00" );
+        return df.format(value).toString();
+    }
+
+    public static String formatNumber(Double value, int approxim, String separation){
+        String temp = value.toString();
+        String[] list = temp.split("\\.");
+        String res = "";
+        String after = ".";
+        if(!separation.equals(","))
+            after = ",";
+        if(list.length == 2){
+            char[] right = list[1].toCharArray();
+            if(right.length > approxim){
+                int i = 0;
+                while(i < approxim || i > right.length){
+                    after += right[i];
+                    i++;
+                }
+            }else{
+                after += new String(right);
+            }
+            String before = addSeparation(list[0], separation);
+            res = before + after;
+        }else{
+            res = addSeparation(temp, separation);
+        }
+        return res;
+    }
+
+    public static String addSeparation(String value, String separation){
+        char[] list = value.toCharArray();
+        String temp = "";
+        int count = 0;
+            for(int j = list.length - 1; j >= 0; j--){
+                if(count == 3){
+                temp += separation;
+                count = 0;
+            }
+            temp += list[j];
+            count++;
+        }
+        return new String(reverseCharArray(temp.toCharArray()));
+    }
+
+    public static char[] reverseCharArray(char[] array){
+        char[] res = new char[array.length];
+        int i = 0;
+        for(int j = array.length - 1; j >= 0; j--){
+            res[i] = array[j];
+            i++;
+        }
+        return res;
+    }
+    public static Object[] reverseArray(Object[] array){
+        Object[] res = new Object[array.length];
+        int i = 0;
+        for(int j = array.length - 1; j >= 0; j--){
+            res[i] = array[j];
+            i++;
+        }
+        return res;
+    }   
 }
