@@ -15,8 +15,6 @@ import java.lang.annotation.Target;
  */
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface PrimaryKey {
-    String prefix();
-    String sequence();
-    int length(); 
+public @interface Temporal {
+    String type();
 }
