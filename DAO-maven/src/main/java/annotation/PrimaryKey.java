@@ -18,6 +18,5 @@ import java.lang.annotation.Target;
 public @interface PrimaryKey {
     String prefix();
     String sequence();
-    int length(); 
-    int prefixLength();
+    int length();
 }

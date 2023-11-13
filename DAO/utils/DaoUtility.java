@@ -117,10 +117,11 @@ public class DaoUtility {
         String[] lst = new String[4];
         Field field = getPrimaryKeyField(obj);
         PrimaryKey pk = field.getAnnotation(PrimaryKey.class);
-        lst[0] = pk.prefix();
+        String prefix = pk.prefix();
+        lst[0] = prefix;
         lst[1] = pk.sequence();
         lst[2] = ""+pk.length();
-        lst[3] = ""+pk.prefixLength();
+        lst[3] = ""+prefix.length();
         return lst;
     }
     //OTHERS (GETTERS AND SETTERS)
