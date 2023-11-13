@@ -156,7 +156,7 @@ public class DaoUtility {
         List<Method> res = new ArrayList<>();
         while(objClass != BddObject.class){
             res.addAll(getSettersMethod(objClass));
-            System.out.println(res);
+            // System.out.println(res);
             objClass = objClass.getSuperclass();
         }
         return res;
