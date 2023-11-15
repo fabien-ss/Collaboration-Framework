@@ -14,6 +14,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
+import annotation.Column;
 import utils.DaoUtility;
 import utils.ObjectUtility;
 
@@ -89,7 +90,8 @@ public class BddObject<T>  {
         if( state == true) con.close();
     }
     
-    //UPDATE
+    
+    //QUICK FIX UPDATE
     public void update(Connection con) throws Exception {
         boolean state = false;
         if(con == null){
@@ -101,14 +103,26 @@ public class BddObject<T>  {
         List<Field> fields = DaoUtility.getColumnFields(this.getClass());
         for( int i = 0; i < methods.size(); i++ ){
             Class returnParam = methods.get(i).getReturnType();
+            Column column = fields.get(i).getAnnotation(Column.class);
             if(returnParam.equals(java.util.Date.class) || returnParam.equals(java.sql.Date.class))
-                query += fields.get(i) + " = TO_DATE('" + methods.get(i).invoke(this, (Object[]) null)+"','YYYY-MM-DD')";
+                if(!column.name().equals("")){
+                    query += column.name() + " = TO_DATE('" + methods.get(i).invoke(this, (Object[]) null)+"','YYYY-MM-DD')";
+                }
+                else{
+                    query += fields.get(i).getName() + " = TO_DATE('" + methods.get(i).invoke(this, (Object[]) null)+"','YYYY-MM-DD')";
+                }
             else
-                query += fields.get(i) + " = '"+methods.get(i).invoke(this, (Object[]) null)+"'"; 
+                if(!column.name().equals("")){
+                    query += column.name() + " = '"+methods.get(i).invoke(this, (Object[]) null)+"'";
+                }
+                else{
+                    query += fields.get(i).getName() + " = '"+methods.get(i).invoke(this, (Object[]) null)+"'";
+                }
+                 
             query = query + ",";
         }
         query = query.substring(0, query.lastIndexOf(','));
-        query += " WHERE " + DaoUtility.getTableName(this) +" = '" + DaoUtility.getPrimaryKeyGetMethod(this).invoke( this, (Object[]) null)+"'";
+        query += " WHERE " + DaoUtility.getPrimaryKeyName(this) +" = '" + DaoUtility.getPrimaryKeyGetMethod(this).invoke( this, (Object[]) null)+"'";
        System.out.println(query);
         Statement stmt = con.createStatement();
         stmt.executeUpdate(query);
