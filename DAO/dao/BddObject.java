@@ -19,7 +19,7 @@ import utils.ObjectUtility;
 
 /**
  *
- * @author Mamisoa
+ * @author Mamisoa, fabien
  * @param <T>
  */
 public class BddObject<T>  {
