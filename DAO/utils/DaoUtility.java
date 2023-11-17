@@ -16,6 +16,9 @@ import java.util.ArrayList;
 import java.util.List;
 import static utils.ObjectUtility.capitalize;
 
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.util.HashMap;
 /**
  *
  * @author Mamisoa
@@ -162,4 +165,24 @@ public class DaoUtility {
         }
         return res;
     }
+    
+    public static int getColumnCount(ResultSet rs) throws Exception{
+        ResultSetMetaData rsmd = rs.getMetaData();
+        return rsmd.getColumnCount();
+    }
+    
+    public static HashMap<String, Class> getColumnNameAndType(ResultSet rs) throws Exception{
+        HashMap<String, Class> map = new HashMap<>();
+        HashMap<Integer, Class> mapping = ClassMapping.getClassMapTable();
+        
+        ResultSetMetaData rsmd = rs.getMetaData();
+        int count = rsmd.getColumnCount();
+        
+        for(int i = 1; i <= count; i++){
+            Integer key = rsmd.getColumnType(i);
+            String column = rsmd.getColumnName(i);
+            map.put(column, mapping.get(key));
+        }
+        return map;
+    }   
 }
