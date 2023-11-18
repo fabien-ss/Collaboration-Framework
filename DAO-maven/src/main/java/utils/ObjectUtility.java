@@ -5,7 +5,10 @@
 package utils;
 
 import java.lang.reflect.Array;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.text.DecimalFormat;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -99,4 +102,42 @@ public class ObjectUtility {
         }
         return res;
     }   
+    public static boolean isAtDefaultValue(Method field, Object obj) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+     //   field.setAccessible(true);
+        Object value = field.invoke(obj);
+       // field.setAccessible(false);
+
+        if (value == null) {
+            return true;
+        } else if (field.getReturnType().isPrimitive()) {
+         //   System.out.println("ici "+getPrimitiveDefaultValue(field.getReturnType()));
+            return value.equals(getPrimitiveDefaultValue(field.getReturnType()));
+        } else if (value instanceof Collection) {
+            return ((Collection<?>) value).isEmpty();
+        } else {
+            return false; 
+        }
+    }
+
+    private static Object getPrimitiveDefaultValue(Class<?> type) {
+        if (type == boolean.class) {
+            return false;
+        } else if (type == char.class) {
+            return '\u0000';
+        } else if (type == double.class) {
+            return 0.0;
+        } else if (type == float.class) {
+            return 0.0f;
+        } else if (type == byte.class) {
+            return (byte) 0;
+        } else if (type == short.class) {
+            return (short) 0;
+        } else if (type == int.class) {
+            return 0;
+        } else if (type == long.class) {
+            return 0L;
+        } else {
+            return null;  // Pour d'autres types primitifs, la valeur par défaut est null
+        }
+    }
 }

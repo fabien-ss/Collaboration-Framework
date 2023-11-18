@@ -57,7 +57,7 @@ public class DbConnection {
     
     //FUNCTION 
     public void readFile()throws Exception{
-        String confFile = System.getProperty("user.dir") + "\\database.conf";
+        String confFile = System.getProperty("user.dir") + "/database.conf";
         List<String[]> lst = FileParser.readFile(confFile);
         for(String[] elt : lst ){
             switch (elt[0]) {

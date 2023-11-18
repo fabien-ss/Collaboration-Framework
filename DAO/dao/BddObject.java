@@ -64,6 +64,7 @@ public class BddObject<T>  {
         stmt.executeUpdate(query);
         if( state == true) con.close();
     }
+
     public void deleteById(Connection con, Object id) throws Exception{
         boolean state = false;
         if(con == null){
@@ -76,6 +77,7 @@ public class BddObject<T>  {
         stmt.executeUpdate(query);
         if( state == true) con.close();
     }
+
     public void deleteWhere(Connection con, String condition) throws Exception {
         boolean state = false;
         if(con == null){
@@ -83,7 +85,7 @@ public class BddObject<T>  {
             state = true;
         }
         String query = "DELETE FROM " + DaoUtility.getTableName(this) + " WHERE " + condition;
-       System.out.println(query);
+        System.out.println(query);
         Statement stmt = con.createStatement();
         stmt.executeUpdate(query);
         if( state == true) con.close();
@@ -114,6 +116,7 @@ public class BddObject<T>  {
         stmt.executeUpdate(query);
         if( state == true) con.close();
     }
+
     //SELECT
     public List<T> findAll(Connection con)throws Exception{
         boolean state = false;
@@ -126,7 +129,8 @@ public class BddObject<T>  {
         if( state == true) con.close();
         return list;
     }
-    
+
+    //
     public T findById(Connection con, Object id)throws Exception{
         boolean state = false;
         if(con == null){
@@ -140,6 +144,7 @@ public class BddObject<T>  {
         return (T) obj;
     }
     
+    //
     public List<T> findWhere(Connection con, String condition) throws Exception {
         boolean state = false;
         if(con == null){
@@ -164,6 +169,8 @@ public class BddObject<T>  {
         stmt.executeUpdate(query);
         if( state == true) con.close();
     }
+
+    
     public List<T> executeQuery(Connection con, String query, Object obj) throws Exception{
         boolean state = false;
         if(con == null){
