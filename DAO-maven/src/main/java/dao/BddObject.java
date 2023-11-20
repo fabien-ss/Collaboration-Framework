@@ -8,6 +8,7 @@ import java.sql.Connection;
 import java.sql.Statement;
 import java.sql.ResultSet;
 
+
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
@@ -38,10 +39,13 @@ public class BddObject<T>  {
                 DaoUtility.setPrimaryKey(this).invoke(this, this.constructPK(con));     
                 query += "'" + DaoUtility.getPrimaryKeyGetMethod(this).invoke(this, (Object[]) null) + "'";  
             }
-           // else if(returnParam.equals(java.sql.Date.class))
-             //   query += "TO_DATE('" + method.invoke(this, (Object[]) null) + "', 'YYYY-MM-DD')";
+            else if(returnParam.equals(java.sql.Date.class))
+                query += "TO_DATE('" + method.invoke(this, (Object[]) null) + "', 'YYYY-MM-DD')";
             else
-                query += "'" + method.invoke(this, (Object[]) null) + "'"; 
+                if(!ObjectUtility.isAtDefaultValue(method, this))
+                    query += "'" + method.invoke(this, (Object[]) null) + "'"; 
+                else 
+                    query += "null";
             query = query + ", ";
         }
         query = query.substring(0, query.lastIndexOf(','));
@@ -65,6 +69,7 @@ public class BddObject<T>  {
         stmt.executeUpdate(query);
         if( state == true) con.close();
     }
+    // DELETE By specifyc id
     public void deleteById(Connection con, Object id) throws Exception{
         boolean state = false;
         if(con == null){
@@ -72,11 +77,12 @@ public class BddObject<T>  {
             state = true;
         }
         String query = "DELETE FROM " + DaoUtility.getTableName(this)+" WHERE " + DaoUtility.getPrimaryKeyName(this)  +" = '" + id +"'";
-       System.out.println(query);
+        System.out.println(query);
         Statement stmt = con.createStatement();
         stmt.executeUpdate(query);
         if( state == true) con.close();
     }
+    // Delete by specific conditions
     public void deleteWhere(Connection con, String condition) throws Exception {
         boolean state = false;
         if(con == null){
@@ -89,8 +95,22 @@ public class BddObject<T>  {
         stmt.executeUpdate(query);
         if( state == true) con.close();
     }
+    // search line to delete
+    public void deleteWhere(Connection con) throws Exception{
+         boolean state = false;
+        if(con == null){
+            con = new DbConnection().connect();
+            state = true;
+        }
+        String condition = DaoUtility.getConditionByAttributeValue(this);
+        String query = "DELETE FROM " + DaoUtility.getTableName(this) + condition;
+        System.out.println(query);
+        Statement stmt = con.createStatement();
+        stmt.executeUpdate(query);
+        if( state == true) con.close();
+    }
 
-    //UPDATE
+    //UPDATE by primary key
     public void update(Connection con) throws Exception {
         boolean state = false;
         if(con == null){
@@ -102,6 +122,7 @@ public class BddObject<T>  {
         List<Field> fields = DaoUtility.getColumnFields(this.getClass());
         for( int i = 0; i < methods.size(); i++ ){
             Class returnParam = methods.get(i).getReturnType();
+            if(ObjectUtility.isAtDefaultValue(methods.get(i), this)) continue;
             if(returnParam.equals(java.util.Date.class) || returnParam.equals(java.sql.Date.class))
                 query += DaoUtility.getFieldColumnName(fields.get(i)) + " = TO_DATE('" + methods.get(i).invoke(this, (Object[]) null)+"','YYYY-MM-DD')";
             else
@@ -114,6 +135,37 @@ public class BddObject<T>  {
         Statement stmt = con.createStatement();
         stmt.executeUpdate(query);
         if( state == true) con.close();
+    }
+
+    // search line to update
+    public void update(Connection con, Object obj) throws Exception{
+        boolean state = false;
+        if(con == null){
+            con = new DbConnection().connect();
+            state = true;    
+        }
+        if(this.getClass() != obj.getClass()) throw new Exception("Class type mismatch");
+        String condition = DaoUtility.getConditionByAttributeValue(this);
+        DaoUtility.mergeTwoObject(this, obj);  // ObjectA <= ObjectB
+
+        String query = "UPDATE "+ DaoUtility.getTableName(this) +" SET ";
+        List<Method> methods = DaoUtility.getAllGettersMethod(this);
+        List<Field> fields = DaoUtility.getColumnFields(this.getClass());
+        for( int i = 0; i < methods.size(); i++ ){
+            Class returnParam = methods.get(i).getReturnType();
+            if(ObjectUtility.isAtDefaultValue(methods.get(i), obj)) continue;
+            if(returnParam.equals(java.util.Date.class) || returnParam.equals(java.sql.Date.class))
+                query += DaoUtility.getFieldColumnName(fields.get(i))  + " = TO_DATE('" + methods.get(i).invoke(this, (Object[]) null)+"','YYYY-MM-DD')";
+            else
+                query += DaoUtility.getFieldColumnName(fields.get(i)) + " = '"+methods.get(i).invoke(this, (Object[]) null)+"'"; 
+            query = query + ",";
+        }
+        query = query.substring(0, query.lastIndexOf(','));
+        query += condition;
+        System.out.println(query);
+        Statement stmt = con.createStatement();
+        stmt.executeUpdate(query);
+        if( state == true) con.close(); 
     }
     
     //SELECT
@@ -156,49 +208,8 @@ public class BddObject<T>  {
         if( state == true) con.close();
         return lst;
     }
-    // search line to update
-    public void update(Connection con, Object obj) throws Exception{
-        boolean state = false;
-        if(con == null){
-            con = new DbConnection().connect();
-            state = true;    
-        }
-        String condition = DaoUtility.getConditionByAttributeValue(this);
-        DaoUtility.mergeTwoObject(this, obj);  // ObjectA <= ObjectB
-
-        String query = "UPDATE "+ DaoUtility.getTableName(this) +" SET ";
-        List<Method> methods = DaoUtility.getAllGettersMethod(this);
-        List<Field> fields = DaoUtility.getColumnFields(this.getClass());
-        for( int i = 0; i < methods.size(); i++ ){
-            Class returnParam = methods.get(i).getReturnType();
-            if(returnParam.equals(java.util.Date.class) || returnParam.equals(java.sql.Date.class))
-                query += DaoUtility.getFieldColumnName(fields.get(i))  + " = TO_DATE('" + methods.get(i).invoke(this, (Object[]) null)+"','YYYY-MM-DD')";
-            else
-                query += DaoUtility.getFieldColumnName(fields.get(i)) + " = '"+methods.get(i).invoke(this, (Object[]) null)+"'"; 
-            query = query + ",";
-        }
-        query = query.substring(0, query.lastIndexOf(','));
-        query += condition;
-        System.out.println(query);
-        Statement stmt = con.createStatement();
-        stmt.executeUpdate(query);
-        if( state == true) con.close(); 
-    }
-     // search line to delete
-    public void deleteWhere(Connection con) throws Exception{
-         boolean state = false;
-        if(con == null){
-            con = new DbConnection().connect();
-            state = true;
-        }
-        String condition = DaoUtility.getConditionByAttributeValue(this);
-        String query = "DELETE FROM " + DaoUtility.getTableName(this) + condition;
-        System.out.println(query);
-        Statement stmt = con.createStatement();
-        stmt.executeUpdate(query);
-        if( state == true) con.close();
-    }
-
+    
+     
     public List<T> findWhere(Connection con, String condition) throws Exception {
         boolean state = false;
         if(con == null){
@@ -262,6 +273,9 @@ public class BddObject<T>  {
                 String name = DaoUtility.getName(fields.get(i));
                 Method method = methods.get(i);
                 Object value = resultSet.getObject( i + 1); //, fields.get(i).getType());
+                if(value == null){
+                    value = ObjectUtility.getPrimitiveDefaultValue(fields.get(i).getType());
+                }
                 method.invoke(object, value);
             }
             catch(org.postgresql.util.PSQLException e){
@@ -278,6 +292,10 @@ public class BddObject<T>  {
                 String name = DaoUtility.getName(fields.get(i));
                 Method method = methods.get(i);
                 Object value = resultSet.getObject(i + 1);// , fields.get(i).getType());
+                System.out.println(value+" valeur "+name);
+                if(value == null){
+                    value = ObjectUtility.getPrimitiveDefaultValue(fields.get(i).getType());
+                }
                 method.invoke(object, value);
             }
             catch(org.postgresql.util.PSQLException e){

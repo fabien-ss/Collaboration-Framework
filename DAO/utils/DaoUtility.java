@@ -9,7 +9,6 @@ import annotation.Column;
 import annotation.PrimaryKey;
 
 import dao.BddObject;
-
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -21,6 +20,45 @@ import static utils.ObjectUtility.capitalize;
  * @author Mamisoa
  */
 public class DaoUtility {
+    
+    public static void mergeTwoObject(Object o1, Object o2) throws Exception {
+        Field[] fields = o2.getClass().getDeclaredFields();
+        System.out.println(fields.length);
+      //  List<Method> lst = getAllGettersMethod(o2);
+        for (int i = 0; i < fields.length; i++) {
+            Method method = o2.getClass().getDeclaredMethod("get"+ObjectUtility.capitalize(fields[i].getName()));
+            System.out.println(method.getName());
+            if(!ObjectUtility.isAtDefaultValue(method, o2)){
+                fields[i].setAccessible(true);
+                fields[i].set(o1, method.invoke(o2));
+                fields[i].setAccessible(false);
+            }
+        }
+    }
+    
+    public static String getFieldColumnName(Field field) {
+        if(field.isAnnotationPresent(Column.class)) {
+            Column column = field.getAnnotation(Column.class);
+            if(!column.equals("")){
+                return column.name();
+            }
+        }
+        return field.getName();
+    }
+
+    public static String getConditionByAttributeValue(Object obj) throws Exception{
+        String condition = " WHERE ";
+        Field[] fields = obj.getClass().getDeclaredFields();
+        List<Method> lst = getAllGettersMethod(obj);
+        for (int i = 0; i < lst.size(); i++) {
+            if(!ObjectUtility.isAtDefaultValue(lst.get(i), obj)){
+                if(fields[i].isAnnotationPresent(Column.class)){
+                    condition += getFieldColumnName(fields[i]) + "='" + lst.get(i).invoke(obj) + "' AND ";
+                }
+            }
+        }
+        return condition.substring(0, condition.length() - 5);
+    }
     
     //TABLE
     public static String getTableName(Object obj){

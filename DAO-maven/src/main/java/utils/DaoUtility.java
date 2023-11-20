@@ -20,7 +20,7 @@ import static utils.ObjectUtility.capitalize;
  * @author Mamisoa
  */
 public class DaoUtility {
-
+    
     public static void mergeTwoObject(Object o1, Object o2) throws Exception {
         Field[] fields = o2.getClass().getDeclaredFields();
         System.out.println(fields.length);
@@ -52,7 +52,9 @@ public class DaoUtility {
         List<Method> lst = getAllGettersMethod(obj);
         for (int i = 0; i < lst.size(); i++) {
             if(!ObjectUtility.isAtDefaultValue(lst.get(i), obj)){
-                condition += getFieldColumnName(fields[i]) + "='" + lst.get(i).invoke(obj) + "' AND ";
+                if(fields[i].isAnnotationPresent(Column.class)){
+                    condition += getFieldColumnName(fields[i]) + "='" + lst.get(i).invoke(obj) + "' AND ";
+                }
             }
         }
         return condition.substring(0, condition.length() - 5);

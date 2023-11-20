@@ -103,14 +103,11 @@ public class ObjectUtility {
         return res;
     }   
     public static boolean isAtDefaultValue(Method field, Object obj) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-     //   field.setAccessible(true);
         Object value = field.invoke(obj);
-       // field.setAccessible(false);
-
+    
         if (value == null) {
             return true;
         } else if (field.getReturnType().isPrimitive()) {
-         //   System.out.println("ici "+getPrimitiveDefaultValue(field.getReturnType()));
             return value.equals(getPrimitiveDefaultValue(field.getReturnType()));
         } else if (value instanceof Collection) {
             return ((Collection<?>) value).isEmpty();
@@ -119,7 +116,7 @@ public class ObjectUtility {
         }
     }
 
-    private static Object getPrimitiveDefaultValue(Class<?> type) {
+    public static Object getPrimitiveDefaultValue(Class<?> type) {
         if (type == boolean.class) {
             return false;
         } else if (type == char.class) {
