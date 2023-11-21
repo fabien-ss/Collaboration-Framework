@@ -269,7 +269,7 @@ public class BddObject<T>  {
     private T convertToObject(ResultSet resultSet, List<Field> fields, List<Method> methods, Object obj) throws Exception{
         Object object = obj.getClass().getDeclaredConstructor().newInstance();
         for( int i = 0; i < fields.size() ; i++ ){
-            try{
+           // try{
                 String name = DaoUtility.getName(fields.get(i));
                 Method method = methods.get(i);
                 Object value = resultSet.getObject( i + 1); //, fields.get(i).getType());
@@ -277,10 +277,10 @@ public class BddObject<T>  {
                     value = ObjectUtility.getPrimitiveDefaultValue(fields.get(i).getType());
                 }
                 method.invoke(object, value);
-            }
+            /* }
             catch(org.postgresql.util.PSQLException e){
                 System.out.println(e);
-            }
+            }*/
         }
         return (T) object;
     }
@@ -288,19 +288,19 @@ public class BddObject<T>  {
     private T convertToObject(ResultSet resultSet, List<Field> fields, List<Method> methods) throws Exception{
         Object object = this.getClass().getDeclaredConstructor().newInstance();
         for( int i = 0; i < fields.size() ; i++ ){
-           try{
+          // try{
                 String name = DaoUtility.getName(fields.get(i));
                 Method method = methods.get(i);
                 Object value = resultSet.getObject(i + 1);// , fields.get(i).getType());
-                System.out.println(value+" valeur "+name);
+              //  System.out.println(value+" valeur "+name);
                 if(value == null){
                     value = ObjectUtility.getPrimitiveDefaultValue(fields.get(i).getType());
                 }
                 method.invoke(object, value);
-            }
+           /*  }
             catch(org.postgresql.util.PSQLException e){
                 System.out.println(e);
-            }
+            }*/
         }
         return (T) object;
     }   

@@ -2,6 +2,7 @@ package ambovombe;
 
 import static org.junit.Assert.assertTrue;
 
+import java.sql.Connection;
 import java.sql.Timestamp;
 import java.util.List;
 
@@ -11,6 +12,7 @@ import annotation.Column;
 import annotation.PrimaryKey;
 import annotation.Table;
 import dao.BddObject;
+import dao.DbConnection;
 
 /**
  * Unit test for simple App.
@@ -24,7 +26,7 @@ public class AppTest extends BddObject
     @Column(name = "prenom")
     String prenom;
     @Column(name = "age")
-    int age;
+    Integer age;
     @Column(name = "moment")
     Timestamp date;
     @PrimaryKey(prefix = "T", sequence = "seq_test", length = 7)
@@ -36,7 +38,7 @@ public class AppTest extends BddObject
     int t;
 
     public AppTest(){}
-    public AppTest(String nom, String prenom, int a, Timestamp date) {
+    public AppTest(String nom, String prenom, Integer a, Timestamp date) {
         this.setNom(nom);
         this.setPrenom(prenom);
         this.setAge(a);
@@ -54,10 +56,10 @@ public class AppTest extends BddObject
     public void setC(String c) {
         C = c;
     }
-    public void setAge(int age) {
+    public void setAge(Integer age) {
         this.age = age;
     }
-    public int getAge() {
+    public Integer getAge() {
         return age;
     }
     public String getNom() {
@@ -93,19 +95,25 @@ public class AppTest extends BddObject
         assertTrue( true );
     }
     public static void main(String[] args) throws Exception {
-        AppTest app = new AppTest("Jean", "coco",4, new Timestamp(65656));
-        AppTest app2 = new AppTest("Jean",null, 0, new Timestamp(515154));
-        app2.setT(34);
-        Double d = 43.0;
+
+        Connection connection = new DbConnection().connect();
+        connection.setAutoCommit(false);
+        AppTest app = new AppTest("Propla", "coco",null, new Timestamp(65656));
+        AppTest app2 = new AppTest("Fabien","New fabien updated", 48, new Timestamp(515154));
+        app2.setT(2324);
        // app.setT(1);
-        app.save(null);
-        app.setId(null);
+        app.save(connection);
+        connection.commit();
+     //   app.setId(null);
         app.update(null, app2);
-        List<AppTest> apps = app.findWhere(null);
+        connection.commit();
+        List<AppTest> apps = app.findWhere(connection);
         System.out.println("size = " + apps.size());
         System.out.println(apps.get(0).getAge());
         System.out.println(apps.get(0).getId());
         System.out.println(apps.get(0).getC());
         System.out.println(apps.get(0).getT());
+
+        connection.close();
     }
 }
