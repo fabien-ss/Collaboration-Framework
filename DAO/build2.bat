@@ -8,4 +8,5 @@ cd temp
 jar -cf ..\DAO.jar .
 cd ..
 del temp
-
+move DAO.jar E:\ITU\Collaboration-Framework\DAO\
+@REM del DAO.jar 
