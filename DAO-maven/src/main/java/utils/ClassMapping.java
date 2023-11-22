@@ -5,6 +5,8 @@
 package utils;
 
 import java.util.HashMap;
+import java.sql.Timestamp;
+import java.sql.Date;
 /**
  *
  * @author Mamisoa
@@ -27,4 +29,25 @@ public class ClassMapping {
         
         return mapping;
     } 
+    
+    public static HashMap<Integer, Class> getClassMapTable(){
+        HashMap<Integer, Class> mapping = new HashMap<>();
+        
+        mapping.put(4, Integer.class);
+        mapping.put(-5, Integer.class);
+        mapping.put(5, Integer.class);
+        mapping.put(-6, Integer.class);
+        mapping.put(3, Double.class);
+        mapping.put(8, Double.class);
+        mapping.put(2, Double.class);
+        mapping.put(6, Float.class);
+        mapping.put(12, String.class);
+        mapping.put(2014, Timestamp.class);
+        mapping.put(93, Timestamp.class);
+        mapping.put(0, null);
+        mapping.put(91, Date.class);
+        
+        return mapping;
+    
+    }
 }

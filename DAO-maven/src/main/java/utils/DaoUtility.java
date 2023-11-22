@@ -16,12 +16,54 @@ import java.util.ArrayList;
 import java.util.List;
 import static utils.ObjectUtility.capitalize;
 
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.util.HashMap;
 /**
  *
  * @author Mamisoa
  */
 public class DaoUtility {
     
+<<<<<<< Updated upstream
+=======
+    public static void mergeTwoObject(Object o1, Object o2) throws Exception {
+        Field[] fields = o2.getClass().getDeclaredFields();
+        for (int i = 0; i < fields.length; i++) {
+            Method method = o2.getClass().getDeclaredMethod("get"+ObjectUtility.capitalize(fields[i].getName()));
+            if(!ObjectUtility.isAtDefaultValue(method, o2)){
+                fields[i].setAccessible(true);
+                fields[i].set(o1, method.invoke(o2));
+                fields[i].setAccessible(false);
+            }
+        }
+    }
+    
+    public static String getFieldColumnName(Field field) {
+        if(field.isAnnotationPresent(Column.class)) {
+            Column column = field.getAnnotation(Column.class);
+            if(!column.name().equals("")){
+                return column.name();
+            }
+        }
+        return field.getName();
+    }
+
+    public static String getConditionByAttributeValue(Object obj) throws Exception{
+        String condition = " WHERE ";
+        Field[] fields = obj.getClass().getDeclaredFields();
+        List<Method> lst = getAllGettersMethod(obj);
+        for (int i = 0; i < lst.size(); i++) {
+            if(!ObjectUtility.isAtDefaultValue(lst.get(i), obj)){
+                if(fields[i].isAnnotationPresent(Column.class)){
+                    condition += getFieldColumnName(fields[i]) + " = '" + lst.get(i).invoke(obj) + "' AND ";
+                }
+            }
+        }
+        return condition.substring(0, condition.length() - 5);
+    }
+    
+>>>>>>> Stashed changes
     //TABLE
     public static String getTableName(Object obj){
         if(obj.getClass().isAnnotationPresent(Table.class)){
@@ -162,4 +204,24 @@ public class DaoUtility {
         }
         return res;
     }
+    
+    public static int getColumnCount(ResultSet rs) throws Exception{
+        ResultSetMetaData rsmd = rs.getMetaData();
+        return rsmd.getColumnCount();
+    }
+    
+    public static HashMap<String, Class> getColumnNameAndType(ResultSet rs) throws Exception{
+        HashMap<String, Class> map = new HashMap<>();
+        HashMap<Integer, Class> mapping = ClassMapping.getClassMapTable();
+        
+        ResultSetMetaData rsmd = rs.getMetaData();
+        int count = rsmd.getColumnCount();
+        
+        for(int i = 1; i <= count; i++){
+            Integer key = rsmd.getColumnType(i);
+            String column = rsmd.getColumnName(i);
+            map.put(column, mapping.get(key));
+        }
+        return map;
+    }   
 }
