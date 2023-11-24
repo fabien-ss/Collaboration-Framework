@@ -25,8 +25,6 @@ import java.util.HashMap;
  */
 public class DaoUtility {
     
-<<<<<<< Updated upstream
-=======
     public static void mergeTwoObject(Object o1, Object o2) throws Exception {
         Field[] fields = o2.getClass().getDeclaredFields();
         for (int i = 0; i < fields.length; i++) {
@@ -63,7 +61,6 @@ public class DaoUtility {
         return condition.substring(0, condition.length() - 5);
     }
     
->>>>>>> Stashed changes
     //TABLE
     public static String getTableName(Object obj){
         if(obj.getClass().isAnnotationPresent(Table.class)){

@@ -113,13 +113,8 @@ public class BddObject<T>  {
             query = query + ",";
         }
         query = query.substring(0, query.lastIndexOf(','));
-<<<<<<< Updated upstream
-        query += " WHERE " + DaoUtility.getTableName(this) +" = '" + DaoUtility.getPrimaryKeyGetMethod(this).invoke( this, (Object[]) null)+"'";
-       System.out.println(query);
-=======
         query += " WHERE " + DaoUtility.getPrimaryKeyName(this) +" = '" + DaoUtility.getPrimaryKeyGetMethod(this).invoke( this, (Object[]) null)+"'";
         System.out.println(query);
->>>>>>> Stashed changes
         Statement stmt = con.createStatement();
         stmt.executeUpdate(query);
         if( state == true) con.close();
@@ -212,14 +207,10 @@ public class BddObject<T>  {
         for( int i = 0; i < fields.size() ; i++ ){
             String name = DaoUtility.getName(fields.get(i));
             Method method = methods.get(i);
-<<<<<<< Updated upstream
-            Object value = resultSet.getObject( name , fields.get(i).getType());
-=======
             Object value = resultSet.getObject(name); //, fields.get(i).getType());
             if(value == null){
                 value = ObjectUtility.getPrimitiveDefaultValue(fields.get(i).getType());
             }
->>>>>>> Stashed changes
             method.invoke(object, value);
         }
         return (T) object;
@@ -229,18 +220,12 @@ public class BddObject<T>  {
         Object object = this.getClass().getDeclaredConstructor().newInstance();
         for( int i = 0; i < fields.size() ; i++ ){
             String name = DaoUtility.getName(fields.get(i));
-<<<<<<< Updated upstream
-            // System.out.println(name);
-            Method method = methods.get(i);
-            Object value = resultSet.getObject( name , fields.get(i).getType());
-=======
             Method method = methods.get(i);
             Object value = resultSet.getObject(name);// , fields.get(i).getType());
             if(value == null){
                 value = ObjectUtility.getPrimitiveDefaultValue(fields.get(i).getType());
             }
             System.out.println(name+" = "+value);
->>>>>>> Stashed changes
             method.invoke(object, value);
         }
         return (T) object;
