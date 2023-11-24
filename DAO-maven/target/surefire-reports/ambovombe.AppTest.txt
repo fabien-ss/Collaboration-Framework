@@ -1,4 +1,7 @@
 -------------------------------------------------------------------------------
 Test set: ambovombe.AppTest
 -------------------------------------------------------------------------------
-Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.009 s - in ambovombe.AppTest
+Tests run: 1, Failures: 0, Errors: 1, Skipped: 0, Time elapsed: 0.022 s <<< FAILURE! - in ambovombe.AppTest
+initializationError(ambovombe.AppTest)  Time elapsed: 0.007 s  <<< ERROR!
+java.lang.IllegalArgumentException: Test class can only have one constructor
+

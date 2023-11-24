@@ -5,6 +5,6 @@ annotation/Table.class
 parser/FileParser.class
 dao/BddObject.class
 dao/DbConnection.class
-annotation/Column.class
 annotation/PrimaryKey.class
+annotation/Column.class
 utils/DaoUtility.class

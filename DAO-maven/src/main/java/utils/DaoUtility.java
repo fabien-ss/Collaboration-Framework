@@ -23,6 +23,7 @@ public class DaoUtility {
     
     public static void mergeTwoObject(Object o1, Object o2) throws Exception {
         Field[] fields = o2.getClass().getDeclaredFields();
+    
         System.out.println(fields.length);
       //  List<Method> lst = getAllGettersMethod(o2);
         for (int i = 0; i < fields.length; i++) {

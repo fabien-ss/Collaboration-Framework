@@ -25,7 +25,7 @@ import utils.ObjectUtility;
  */
 public class BddObject<T>  {
     //INSERT
-    public void save(Connection con) throws Exception{
+    public  void save(Connection con) throws Exception{
         boolean state = false;
         if(con == null){
             con = new DbConnection().connect();
@@ -272,7 +272,7 @@ public class BddObject<T>  {
            // try{
                 String name = DaoUtility.getName(fields.get(i));
                 Method method = methods.get(i);
-                Object value = resultSet.getObject( i + 1); //, fields.get(i).getType());
+                Object value = resultSet.getObject(name); //, fields.get(i).getType());
                 if(value == null){
                     value = ObjectUtility.getPrimitiveDefaultValue(fields.get(i).getType());
                 }
@@ -291,7 +291,7 @@ public class BddObject<T>  {
           // try{
                 String name = DaoUtility.getName(fields.get(i));
                 Method method = methods.get(i);
-                Object value = resultSet.getObject(i + 1);// , fields.get(i).getType());
+                Object value = resultSet.getObject(name);// , fields.get(i).getType());
               //  System.out.println(value+" valeur "+name);
                 if(value == null){
                     value = ObjectUtility.getPrimitiveDefaultValue(fields.get(i).getType());

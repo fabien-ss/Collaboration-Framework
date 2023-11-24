@@ -71,7 +71,7 @@ public class Employe extends BddObject{
         Connection connection = new DbConnection().connect();
         connection.setAutoCommit(false);
         
-        Employe employe = new Employe("NomTest", "PrenomTest", "mailTest@gmail.com");   
+        Employe employe = new Employe("Test1", "PrenomTest", "mailTest@gmail.com");   
         employe.save(connection); 
         connection.commit();
 
