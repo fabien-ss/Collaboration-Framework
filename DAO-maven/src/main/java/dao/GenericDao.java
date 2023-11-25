@@ -7,7 +7,7 @@ package dao;
 import java.sql.Connection;
 import java.sql.Statement;
 import java.sql.ResultSet;
-
+import java.sql.ResultSetMetaData;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
@@ -22,73 +22,72 @@ import utils.ObjectUtility;
  * @author Mamisoa
  * @param <T>
  */
-public class BddObject<T>  {
-    //INSERT 
-    public void save(Connection con) throws Exception{
+public class GenericDao{
+    //INSERT
+    public static void save(Connection con, Object obj) throws Exception{
         boolean state = false;
         if(con == null){
             con = new DbConnection().connect();
             state = true;
         }
-        String query = "INSERT INTO "+DaoUtility.getTableName(this)+DaoUtility.getListColumns(this)+" VALUES (";
-        List<Method> lst = DaoUtility.getAllGettersMethod(this);
-        System.out.println(lst);
+        String query = "INSERT INTO "+DaoUtility.getTableName(obj)+DaoUtility.getListColumns(obj)+" VALUES (";
+        List<Method> lst = DaoUtility.getAllGettersMethod(obj);
         for(Method method : lst){
             Class<?> returnParam = method.getReturnType();
-            // System.out.println(method.getName());
-            if(method.equals(DaoUtility.getPrimaryKeyGetMethod(this)) && method.invoke(this, (Object[]) null) == null && returnParam.equals(String.class)){
-                query += "'" + constructPK(con) + "'";  
-            }else if(method.equals(DaoUtility.getPrimaryKeyGetMethod(this)) && method.invoke(this, (Object[]) null) == null && returnParam.equals(Integer.class)){
-                query += constructPK(con);
+            if(method.equals(DaoUtility.getPrimaryKeyGetMethod(obj)) && method.invoke(obj, (Object[]) null) == null && returnParam.equals(String.class)){
+                query += "'" + constructPK(con, obj) + "'";  
+            }else if(method.equals(DaoUtility.getPrimaryKeyGetMethod(obj)) && method.invoke(obj, (Object[]) null) == null && returnParam.equals(Integer.class)){
+                query += constructPK(con, obj);
             }
-            else if(method.invoke(this, (Object[]) null) == null){
+            else if(method.invoke(obj, (Object[]) null) == null && !method.equals(DaoUtility.getPrimaryKeyGetMethod(obj))){
                 query += "default";
             }
             else if(returnParam.equals(java.sql.Date.class))
-                query += "TO_DATE('" + method.invoke(this, (Object[]) null) + "', 'YYYY-MM-DD')";
+            query += "TO_DATE('" + method.invoke(obj, (Object[]) null) + "', 'YYYY-MM-DD')";
             else
-                query += "'" + method.invoke(this, (Object[]) null) + "'"; 
+            query += "'" + method.invoke(obj, (Object[]) null) + "'"; 
             query = query + ", ";
         }
         query = query.substring(0, query.lastIndexOf(','));
         query = query + ")";
+        System.out.println(query);
         Statement stmt =  con.createStatement();
         stmt.executeUpdate(query);
         if( state == true) con.close();
     }
     
     //DELETE
-    public void delete(Connection con) throws Exception {
+    public static void delete(Connection con, Object obj) throws Exception {
         boolean state = false;
         if(con == null){
             con = new DbConnection().connect();
             state = true;
         }
-        String query = "DELETE FROM " + DaoUtility.getTableName(this)+" WHERE " + DaoUtility.getPrimaryKeyName(this)  + " = '" + DaoUtility.getPrimaryKeyGetMethod(this).invoke(this, (Object[]) null) + "'" ;
+        String query = "DELETE FROM " + DaoUtility.getTableName(obj)+" WHERE " + DaoUtility.getPrimaryKeyName(obj)  + " = '" + DaoUtility.getPrimaryKeyGetMethod(obj).invoke(obj, (Object[]) null) + "'" ;
 //        System.out.println(query);
         Statement stmt = con.createStatement();
         stmt.executeUpdate(query);
         if( state == true) con.close();
     }
-    public void deleteById(Connection con, Object id) throws Exception{
+    public static void deleteById(Connection con, Object id, Object obj) throws Exception{
         boolean state = false;
         if(con == null){
             con = new DbConnection().connect();
             state = true;
         }
-        String query = "DELETE FROM " + DaoUtility.getTableName(this)+" WHERE " + DaoUtility.getPrimaryKeyName(this)  +" = '" + id +"'";
+        String query = "DELETE FROM " + DaoUtility.getTableName(obj)+" WHERE " + DaoUtility.getPrimaryKeyName(obj)  +" = '" + id +"'";
        System.out.println(query);
         Statement stmt = con.createStatement();
         stmt.executeUpdate(query);
         if( state == true) con.close();
     }
-    public void deleteWhere(Connection con, String condition) throws Exception {
+    public static void deleteWhere(Connection con, String condition, Object obj) throws Exception {
         boolean state = false;
         if(con == null){
             con = new DbConnection().connect();
             state = true;
         }
-        String query = "DELETE FROM " + DaoUtility.getTableName(this) + " WHERE " + condition;
+        String query = "DELETE FROM " + DaoUtility.getTableName(obj) + " WHERE " + condition;
        System.out.println(query);
         Statement stmt = con.createStatement();
         stmt.executeUpdate(query);
@@ -96,65 +95,65 @@ public class BddObject<T>  {
     }
     
     //UPDATE
-    public void update(Connection con) throws Exception {
+    public static void update(Connection con,Object obj) throws Exception {
         boolean state = false;
         if(con == null){
             con = new DbConnection().connect();
             state = true;
         }
-        String query = "UPDATE "+ DaoUtility.getTableName(this) +" SET ";
-        List<Method> methods = DaoUtility.getAllGettersMethod(this);
-        List<Field> fields = DaoUtility.getColumnFields(this.getClass());
+        String query = "UPDATE "+ DaoUtility.getTableName(obj) +" SET ";
+        List<Method> methods = DaoUtility.getAllGettersMethod(obj);
+        List<Field> fields = DaoUtility.getColumnFields(obj.getClass());
         for( int i = 0; i < methods.size(); i++ ){
             Class returnParam = methods.get(i).getReturnType();
             if(returnParam.equals(java.util.Date.class) || returnParam.equals(java.sql.Date.class))
-                query += fields.get(i).getName() + " = TO_DATE('" + methods.get(i).invoke(this, (Object[]) null)+"','YYYY-MM-DD')";
+                query += fields.get(i).getName() + " = TO_DATE('" + methods.get(i).invoke(obj, (Object[]) null)+"','YYYY-MM-DD')";
             else
-                query += fields.get(i).getName() + " = '"+methods.get(i).invoke(this, (Object[]) null)+"'"; 
+                query += fields.get(i).getName() + " = '"+methods.get(i).invoke(obj, (Object[]) null)+"'"; 
             query = query + ",";
         }
         query = query.substring(0, query.lastIndexOf(','));
-        query += " WHERE " + DaoUtility.getPrimaryKeyName(this) +" = '" + DaoUtility.getPrimaryKeyGetMethod(this).invoke( this, (Object[]) null)+"'";
+        query += " WHERE " + DaoUtility.getPrimaryKeyName(obj) +" = '" + DaoUtility.getPrimaryKeyGetMethod(obj).invoke( obj, (Object[]) null)+"'";
         System.out.println(query);
         Statement stmt = con.createStatement();
         stmt.executeUpdate(query);
         if( state == true) con.close();
     }
     //SELECT
-    public List<T> findAll(Connection con)throws Exception{
+    public static <T> List<T> findAll(Connection con, Object obj)throws Exception{
         boolean state = false;
         if(con == null){
             con = new DbConnection().connect();
             state = true;
         }
-        String query = "SELECT * FROM " + DaoUtility.getTableName(this);
-        List<T> list = this.fetch(con, query);
+        String query = "SELECT * FROM " + DaoUtility.getTableName(obj);
+        List<T> list = fetch(con, query, obj);
         if( state == true) con.close();
         return list;
     }
     
-    public T findById(Connection con, Object id)throws Exception{
+    public static <T> T findById(Connection con, Object id, Object obj)throws Exception{
         boolean state = false;
         if(con == null){
             con = new DbConnection().connect();
             state = true;
         }
-        String query = "SELECT * FROM " + DaoUtility.getTableName(this) + " WHERE " + DaoUtility.getPrimaryKeyName(this) + " = '" + id + "'";
-        T obj = this.fetch(con, query).get(0);
+        String query = "SELECT * FROM " + DaoUtility.getTableName(obj) + " WHERE " + DaoUtility.getPrimaryKeyName(obj) + " = '" + id + "'";
+        T temp = (T) fetch(con, query, obj).get(0);
         System.out.println(query);
         if( state == true) con.close();
-        return (T) obj;
+        return temp;
     }
     
-    public List<T> findWhere(Connection con, String condition) throws Exception {
+    public static <T> List<T>  findWhere(Connection con, String condition, Object obj) throws Exception {
         boolean state = false;
         if(con == null){
             con = new DbConnection().connect();
             state = true;
         }
-        String query = "SELECT * FROM " + DaoUtility.getTableName(this) + " WHERE " + condition;
+        String query = "SELECT * FROM " + DaoUtility.getTableName(obj) + " WHERE " + condition;
         System.out.println(query);
-        List<T> lst = this.fetch(con, query);
+        List<T>  lst = fetch(con, query, obj);
         if( state == true) con.close();
         return lst;
     }
@@ -171,7 +170,7 @@ public class BddObject<T>  {
         stmt.executeUpdate(query);
         if( state == true) con.close();
     }
-    public List<T> executeQuery(Connection con, String query, Object obj) throws Exception{
+    public <T> List<T> executeQuery(Connection con, String query, Object obj) throws Exception{
         boolean state = false;
         if(con == null){
             con = new DbConnection().connect();
@@ -183,27 +182,28 @@ public class BddObject<T>  {
         List<Field> fields = DaoUtility.getColumnFields(obj.getClass());
         List<Method> methods = DaoUtility.getAllSettersMethod(obj);
         while( rs.next() ){
-            T now = this.convertToObject(rs, fields, methods, obj);
+            T now = convertToObject(rs, fields, methods, obj);
             list.add(now);
         }
         if( state == true) con.close();
         return list;
     }
     
-    public List<T> fetch( Connection con, String query ) throws Exception{
+    public static <T> List<T> fetch(Connection con, String query, Object obj) throws Exception{
         List<T> list = new ArrayList<>();
         Statement stmt = con.createStatement();
         ResultSet rs = stmt.executeQuery(query);
-        List<Field> fields = DaoUtility.getColumnFields(this.getClass());
-        List<Method> methods = DaoUtility.getAllSettersMethod(this);
+        List<Field> fields = DaoUtility.getColumnFields(obj.getClass());
+        List<Method> methods = DaoUtility.getAllSettersMethod(obj);
         while( rs.next() ){
-            T now = this.convertToObject(rs, fields, methods);
+            T now = convertToObject(rs, fields, methods, obj);
             list.add(now);
         }
         return list;
     }
     
-    private T convertToObject(ResultSet resultSet, List<Field> fields, List<Method> methods, Object obj) throws Exception{
+    @SuppressWarnings("unchecked")
+    private static <T> T convertToObject(ResultSet resultSet, List<Field> fields, List<Method> methods, Object obj) throws Exception{
         Object object = obj.getClass().getDeclaredConstructor().newInstance();
         for( int i = 0; i < fields.size() ; i++ ){
             String name = DaoUtility.getName(fields.get(i));
@@ -217,28 +217,28 @@ public class BddObject<T>  {
         return (T) object;
     }
     
-    private T convertToObject(ResultSet resultSet, List<Field> fields, List<Method> methods) throws Exception{
-        Object object = this.getClass().getDeclaredConstructor().newInstance();
-        for( int i = 0; i < fields.size() ; i++ ){
-            String name = DaoUtility.getName(fields.get(i));
-            Method method = methods.get(i);
-            Object value = resultSet.getObject(name);// , fields.get(i).getType());
-            if(value == null){
-                value = ObjectUtility.getPrimitiveDefaultValue(fields.get(i).getType());
-            }
-            System.out.println(name+" = "+value);
-            method.invoke(object, value);
-        }
-        return (T) object;
-    }   
+    // private T convertToObject(ResultSet resultSet, List<Field> fields, List<Method> methods) throws Exception{
+    //     Object object = this.getClass().getDeclaredConstructor().newInstance();
+    //     for( int i = 0; i < fields.size() ; i++ ){
+    //         String name = DaoUtility.getName(fields.get(i));
+    //         Method method = methods.get(i);
+    //         Object value = resultSet.getObject(name);// , fields.get(i).getType());
+    //         if(value == null){
+    //             value = ObjectUtility.getPrimitiveDefaultValue(fields.get(i).getType());
+    //         }
+    //         System.out.println(name+" = "+value);
+    //         method.invoke(object, value);
+    //     }
+    //     return (T) object;
+    // }   
         
-    public String constructPK(Connection con)throws Exception{
+    public static  String constructPK(Connection con, Object obj)throws Exception{
         boolean state = false;
         if(con == null){
             con = new DbConnection().connect();
             state = true;
         }
-        String[] detail = DaoUtility.getPrimaryKeyDetails(this);
+        String[] detail = DaoUtility.getPrimaryKeyDetails(obj);
         if(detail[0].equals("true"))
             return "default";
         Statement stmt = con.createStatement();

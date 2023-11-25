@@ -1,59 +1,57 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report.xsd" name="ambovombe.AppTest" time="0.009" tests="1" errors="0" skipped="0" failures="0">
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report.xsd" name="ambovombe.AppTest" time="0.038" tests="1" errors="0" skipped="0" failures="0">
   <properties>
-    <property name="java.specification.version" value="17"/>
+    <property name="java.specification.version" value="21"/>
     <property name="sun.jnu.encoding" value="UTF-8"/>
-    <property name="java.class.path" value="/Users/rakharrs/S5/frproject/dao/target/test-classes:/Users/rakharrs/S5/frproject/dao/target/classes:/Users/rakharrs/.m2/repository/junit/junit/4.11/junit-4.11.jar:/Users/rakharrs/.m2/repository/org/hamcrest/hamcrest-core/1.3/hamcrest-core-1.3.jar:/Users/rakharrs/.m2/repository/org/postgresql/postgresql/42.6.0/postgresql-42.6.0.jar:/Users/rakharrs/.m2/repository/org/checkerframework/checker-qual/3.31.0/checker-qual-3.31.0.jar:/Users/rakharrs/.m2/repository/com/mysql/mysql-connector-j/8.2.0/mysql-connector-j-8.2.0.jar:/Users/rakharrs/.m2/repository/com/google/protobuf/protobuf-java/3.21.9/protobuf-java-3.21.9.jar:/Users/rakharrs/.m2/repository/com/oracle/database/jdbc/ojdbc10/19.21.0.0/ojdbc10-19.21.0.0.jar:/Users/rakharrs/.m2/repository/org/xerial/sqlite-jdbc/3.43.2.2/sqlite-jdbc-3.43.2.2.jar:/Users/rakharrs/.m2/repository/org/slf4j/slf4j-api/1.7.36/slf4j-api-1.7.36.jar:"/>
-    <property name="java.vm.vendor" value="Eclipse Adoptium"/>
+    <property name="java.class.path" value="/home/fanilo/Documents/L3/Collaboration-Framework/DAO-maven/target/test-classes:/home/fanilo/Documents/L3/Collaboration-Framework/DAO-maven/target/classes:/home/fanilo/.m2/repository/junit/junit/4.11/junit-4.11.jar:/home/fanilo/.m2/repository/org/hamcrest/hamcrest-core/1.3/hamcrest-core-1.3.jar:/home/fanilo/.m2/repository/org/postgresql/postgresql/42.6.0/postgresql-42.6.0.jar:/home/fanilo/.m2/repository/org/checkerframework/checker-qual/3.31.0/checker-qual-3.31.0.jar:/home/fanilo/.m2/repository/com/mysql/mysql-connector-j/8.2.0/mysql-connector-j-8.2.0.jar:/home/fanilo/.m2/repository/com/google/protobuf/protobuf-java/3.21.9/protobuf-java-3.21.9.jar:/home/fanilo/.m2/repository/com/oracle/database/jdbc/ojdbc10/19.21.0.0/ojdbc10-19.21.0.0.jar:/home/fanilo/.m2/repository/org/xerial/sqlite-jdbc/3.43.2.2/sqlite-jdbc-3.43.2.2.jar:/home/fanilo/.m2/repository/org/slf4j/slf4j-api/1.7.36/slf4j-api-1.7.36.jar:"/>
+    <property name="java.vm.vendor" value="Oracle Corporation"/>
     <property name="sun.arch.data.model" value="64"/>
-    <property name="java.vendor.url" value="https://adoptium.net/"/>
-    <property name="os.name" value="Mac OS X"/>
-    <property name="java.vm.specification.version" value="17"/>
+    <property name="java.vendor.url" value="https://openjdk.org/"/>
+    <property name="os.name" value="Linux"/>
+    <property name="java.vm.specification.version" value="21"/>
     <property name="sun.java.launcher" value="SUN_STANDARD"/>
-    <property name="user.country" value="MG"/>
-    <property name="sun.boot.library.path" value="/Library/Java/JavaVirtualMachines/temurin-17.jdk/Contents/Home/lib"/>
-    <property name="sun.java.command" value="/Users/rakharrs/S5/frproject/dao/target/surefire/surefirebooter2078445424408367092.jar /Users/rakharrs/S5/frproject/dao/target/surefire 2023-11-09T11-44-13_950-jvmRun1 surefire8039248470754912926tmp surefire_08266872146394756522tmp"/>
-    <property name="http.nonProxyHosts" value="local|*.local|169.254/16|*.169.254/16"/>
+    <property name="user.country" value="US"/>
+    <property name="sun.boot.library.path" value="/usr/lib/jvm/java-21-openjdk/lib"/>
+    <property name="sun.java.command" value="/home/fanilo/Documents/L3/Collaboration-Framework/DAO-maven/target/surefire/surefirebooter15745849341811817451.jar /home/fanilo/Documents/L3/Collaboration-Framework/DAO-maven/target/surefire 2023-11-13T11-14-58_684-jvmRun1 surefire10161284968505849035tmp surefire_03051311259096749070tmp"/>
     <property name="jdk.debug" value="release"/>
-    <property name="surefire.test.class.path" value="/Users/rakharrs/S5/frproject/dao/target/test-classes:/Users/rakharrs/S5/frproject/dao/target/classes:/Users/rakharrs/.m2/repository/junit/junit/4.11/junit-4.11.jar:/Users/rakharrs/.m2/repository/org/hamcrest/hamcrest-core/1.3/hamcrest-core-1.3.jar:/Users/rakharrs/.m2/repository/org/postgresql/postgresql/42.6.0/postgresql-42.6.0.jar:/Users/rakharrs/.m2/repository/org/checkerframework/checker-qual/3.31.0/checker-qual-3.31.0.jar:/Users/rakharrs/.m2/repository/com/mysql/mysql-connector-j/8.2.0/mysql-connector-j-8.2.0.jar:/Users/rakharrs/.m2/repository/com/google/protobuf/protobuf-java/3.21.9/protobuf-java-3.21.9.jar:/Users/rakharrs/.m2/repository/com/oracle/database/jdbc/ojdbc10/19.21.0.0/ojdbc10-19.21.0.0.jar:/Users/rakharrs/.m2/repository/org/xerial/sqlite-jdbc/3.43.2.2/sqlite-jdbc-3.43.2.2.jar:/Users/rakharrs/.m2/repository/org/slf4j/slf4j-api/1.7.36/slf4j-api-1.7.36.jar:"/>
+    <property name="surefire.test.class.path" value="/home/fanilo/Documents/L3/Collaboration-Framework/DAO-maven/target/test-classes:/home/fanilo/Documents/L3/Collaboration-Framework/DAO-maven/target/classes:/home/fanilo/.m2/repository/junit/junit/4.11/junit-4.11.jar:/home/fanilo/.m2/repository/org/hamcrest/hamcrest-core/1.3/hamcrest-core-1.3.jar:/home/fanilo/.m2/repository/org/postgresql/postgresql/42.6.0/postgresql-42.6.0.jar:/home/fanilo/.m2/repository/org/checkerframework/checker-qual/3.31.0/checker-qual-3.31.0.jar:/home/fanilo/.m2/repository/com/mysql/mysql-connector-j/8.2.0/mysql-connector-j-8.2.0.jar:/home/fanilo/.m2/repository/com/google/protobuf/protobuf-java/3.21.9/protobuf-java-3.21.9.jar:/home/fanilo/.m2/repository/com/oracle/database/jdbc/ojdbc10/19.21.0.0/ojdbc10-19.21.0.0.jar:/home/fanilo/.m2/repository/org/xerial/sqlite-jdbc/3.43.2.2/sqlite-jdbc-3.43.2.2.jar:/home/fanilo/.m2/repository/org/slf4j/slf4j-api/1.7.36/slf4j-api-1.7.36.jar:"/>
     <property name="sun.cpu.endian" value="little"/>
-    <property name="user.home" value="/Users/rakharrs"/>
+    <property name="user.home" value="/home/fanilo"/>
     <property name="user.language" value="en"/>
     <property name="java.specification.vendor" value="Oracle Corporation"/>
-    <property name="java.version.date" value="2023-07-18"/>
-    <property name="java.home" value="/Library/Java/JavaVirtualMachines/temurin-17.jdk/Contents/Home"/>
+    <property name="java.version.date" value="2023-09-19"/>
+    <property name="java.home" value="/usr/lib/jvm/java-21-openjdk"/>
     <property name="file.separator" value="/"/>
-    <property name="basedir" value="/Users/rakharrs/S5/frproject/dao"/>
-    <property name="java.vm.compressedOopsMode" value="Zero based"/>
+    <property name="basedir" value="/home/fanilo/Documents/L3/Collaboration-Framework/DAO-maven"/>
+    <property name="java.vm.compressedOopsMode" value="32-bit"/>
     <property name="line.separator" value="&#10;"/>
     <property name="java.specification.name" value="Java Platform API Specification"/>
     <property name="java.vm.specification.vendor" value="Oracle Corporation"/>
-    <property name="surefire.real.class.path" value="/Users/rakharrs/S5/frproject/dao/target/surefire/surefirebooter2078445424408367092.jar"/>
+    <property name="surefire.real.class.path" value="/home/fanilo/Documents/L3/Collaboration-Framework/DAO-maven/target/surefire/surefirebooter15745849341811817451.jar"/>
     <property name="sun.management.compiler" value="HotSpot 64-Bit Tiered Compilers"/>
-    <property name="ftp.nonProxyHosts" value="local|*.local|169.254/16|*.169.254/16"/>
-    <property name="java.runtime.version" value="17.0.8+7"/>
-    <property name="user.name" value="rakharrs"/>
+    <property name="java.runtime.version" value="21+35"/>
+    <property name="user.name" value="fanilo"/>
+    <property name="stdout.encoding" value="UTF-8"/>
     <property name="path.separator" value=":"/>
-    <property name="os.version" value="13.5"/>
+    <property name="os.version" value="6.5.7-arch1-1"/>
     <property name="java.runtime.name" value="OpenJDK Runtime Environment"/>
     <property name="file.encoding" value="UTF-8"/>
     <property name="java.vm.name" value="OpenJDK 64-Bit Server VM"/>
-    <property name="java.vendor.version" value="Temurin-17.0.8+7"/>
-    <property name="localRepository" value="/Users/rakharrs/.m2/repository"/>
-    <property name="java.vendor.url.bug" value="https://github.com/adoptium/adoptium-support/issues"/>
-    <property name="java.io.tmpdir" value="/var/folders/dt/fs7s2ltx47v8cx4_9npg0ddr0000gn/T/"/>
-    <property name="java.version" value="17.0.8"/>
-    <property name="user.dir" value="/Users/rakharrs/S5/frproject/dao"/>
-    <property name="os.arch" value="aarch64"/>
+    <property name="localRepository" value="/home/fanilo/.m2/repository"/>
+    <property name="java.vendor.url.bug" value="https://bugreport.java.com/bugreport/"/>
+    <property name="java.io.tmpdir" value="/tmp"/>
+    <property name="java.version" value="21"/>
+    <property name="user.dir" value="/home/fanilo/Documents/L3/Collaboration-Framework/DAO-maven"/>
+    <property name="os.arch" value="amd64"/>
     <property name="java.vm.specification.name" value="Java Virtual Machine Specification"/>
     <property name="native.encoding" value="UTF-8"/>
-    <property name="java.library.path" value="/Users/rakharrs/Library/Java/Extensions:/Library/Java/Extensions:/Network/Library/Java/Extensions:/System/Library/Java/Extensions:/usr/lib/java:."/>
-    <property name="java.vm.info" value="mixed mode"/>
-    <property name="java.vendor" value="Eclipse Adoptium"/>
-    <property name="java.vm.version" value="17.0.8+7"/>
-    <property name="sun.io.unicode.encoding" value="UnicodeBig"/>
-    <property name="socksNonProxyHosts" value="local|*.local|169.254/16|*.169.254/16"/>
-    <property name="java.class.version" value="61.0"/>
+    <property name="java.library.path" value="/usr/java/packages/lib:/usr/lib64:/lib64:/lib:/usr/lib"/>
+    <property name="java.vm.info" value="mixed mode, sharing"/>
+    <property name="stderr.encoding" value="UTF-8"/>
+    <property name="java.vendor" value="N/A"/>
+    <property name="java.vm.version" value="21+35"/>
+    <property name="sun.io.unicode.encoding" value="UnicodeLittle"/>
+    <property name="java.class.version" value="65.0"/>
   </properties>
-  <testcase name="shouldAnswerWithTrue" classname="ambovombe.AppTest" time="0"/>
+  <testcase name="shouldAnswerWithTrue" classname="ambovombe.AppTest" time="0.004"/>
 </testsuite>

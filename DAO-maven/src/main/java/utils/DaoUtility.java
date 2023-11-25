@@ -8,8 +8,6 @@ import annotation.Table;
 import annotation.Column;
 import annotation.PrimaryKey;
 
-import dao.BddObject;
-
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -25,8 +23,6 @@ import java.util.HashMap;
  */
 public class DaoUtility {
     
-<<<<<<< Updated upstream
-=======
     public static void mergeTwoObject(Object o1, Object o2) throws Exception {
         Field[] fields = o2.getClass().getDeclaredFields();
         for (int i = 0; i < fields.length; i++) {
@@ -63,7 +59,6 @@ public class DaoUtility {
         return condition.substring(0, condition.length() - 5);
     }
     
->>>>>>> Stashed changes
     //TABLE
     public static String getTableName(Object obj){
         if(obj.getClass().isAnnotationPresent(Table.class)){
@@ -77,7 +72,7 @@ public class DaoUtility {
     //COLUMN
     public static List<Field> getColumnFields(Class objClass){
         List<Field> lst = new ArrayList<>();
-        while(objClass != BddObject.class){
+        while(objClass != Object.class){
             for(Field declaredField : objClass.getDeclaredFields()) {
                 if (declaredField.isAnnotationPresent(Column.class)) {
                     lst.add(declaredField);
@@ -156,14 +151,15 @@ public class DaoUtility {
         return null;
     }
     public static String[] getPrimaryKeyDetails(Object obj) throws Exception{
-        String[] lst = new String[4];
+        String[] lst = new String[5];
         Field field = getPrimaryKeyField(obj);
         PrimaryKey pk = field.getAnnotation(PrimaryKey.class);
         String prefix = pk.prefix();
-        lst[0] = prefix;
-        lst[1] = pk.sequence();
-        lst[2] = ""+pk.length();
-        lst[3] = ""+prefix.length();
+        lst[0] = ""+pk.autoIncrement();
+        lst[1] = prefix;
+        lst[2] = pk.sequence();
+        lst[3] = ""+pk.length();
+        lst[4] = ""+prefix.length();
         return lst;
     }
     //OTHERS (GETTERS AND SETTERS)
@@ -181,7 +177,7 @@ public class DaoUtility {
     public static List<Method> getAllGettersMethod(Object obj) throws Exception{
         Class objClass = obj.getClass();
         List<Method> res = new ArrayList<>();
-        while(objClass != BddObject.class){
+        while(objClass != Object.class){
             res.addAll(getGettersMethod(objClass));
             objClass = objClass.getSuperclass();
         }
@@ -197,7 +193,7 @@ public class DaoUtility {
     public static List<Method> getAllSettersMethod(Object obj) throws Exception{
         Class objClass = obj.getClass();
         List<Method> res = new ArrayList<>();
-        while(objClass != BddObject.class){
+        while(objClass != Object.class){
             res.addAll(getSettersMethod(objClass));
             // System.out.println(res);
             objClass = objClass.getSuperclass();

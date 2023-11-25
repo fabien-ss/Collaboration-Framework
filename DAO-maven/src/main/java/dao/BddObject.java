@@ -23,7 +23,7 @@ import utils.ObjectUtility;
  * @param <T>
  */
 public class BddObject<T>  {
-    //INSERT
+    //INSERT 
     public void save(Connection con) throws Exception{
         boolean state = false;
         if(con == null){
@@ -35,10 +35,11 @@ public class BddObject<T>  {
         System.out.println(lst);
         for(Method method : lst){
             Class<?> returnParam = method.getReturnType();
-            System.out.println(method.getName());
-            if(method.equals(DaoUtility.getPrimaryKeyGetMethod(this)) && method.invoke(this, (Object[]) null) == null){
-                DaoUtility.setPrimaryKey(this).invoke(this, this.constructPK(con));     
-                query += "'" + DaoUtility.getPrimaryKeyGetMethod(this).invoke(this, (Object[]) null) + "'";  
+            // System.out.println(method.getName());
+            if(method.equals(DaoUtility.getPrimaryKeyGetMethod(this)) && method.invoke(this, (Object[]) null) == null && returnParam.equals(String.class)){
+                query += "'" + constructPK(con) + "'";  
+            }else if(method.equals(DaoUtility.getPrimaryKeyGetMethod(this)) && method.invoke(this, (Object[]) null) == null && returnParam.equals(Integer.class)){
+                query += constructPK(con);
             }
             else if(method.invoke(this, (Object[]) null) == null){
                 query += "default";
@@ -107,19 +108,14 @@ public class BddObject<T>  {
         for( int i = 0; i < methods.size(); i++ ){
             Class returnParam = methods.get(i).getReturnType();
             if(returnParam.equals(java.util.Date.class) || returnParam.equals(java.sql.Date.class))
-                query += fields.get(i) + " = TO_DATE('" + methods.get(i).invoke(this, (Object[]) null)+"','YYYY-MM-DD')";
+                query += fields.get(i).getName() + " = TO_DATE('" + methods.get(i).invoke(this, (Object[]) null)+"','YYYY-MM-DD')";
             else
-                query += fields.get(i) + " = '"+methods.get(i).invoke(this, (Object[]) null)+"'"; 
+                query += fields.get(i).getName() + " = '"+methods.get(i).invoke(this, (Object[]) null)+"'"; 
             query = query + ",";
         }
         query = query.substring(0, query.lastIndexOf(','));
-<<<<<<< Updated upstream
-        query += " WHERE " + DaoUtility.getTableName(this) +" = '" + DaoUtility.getPrimaryKeyGetMethod(this).invoke( this, (Object[]) null)+"'";
-       System.out.println(query);
-=======
         query += " WHERE " + DaoUtility.getPrimaryKeyName(this) +" = '" + DaoUtility.getPrimaryKeyGetMethod(this).invoke( this, (Object[]) null)+"'";
         System.out.println(query);
->>>>>>> Stashed changes
         Statement stmt = con.createStatement();
         stmt.executeUpdate(query);
         if( state == true) con.close();
@@ -212,14 +208,10 @@ public class BddObject<T>  {
         for( int i = 0; i < fields.size() ; i++ ){
             String name = DaoUtility.getName(fields.get(i));
             Method method = methods.get(i);
-<<<<<<< Updated upstream
-            Object value = resultSet.getObject( name , fields.get(i).getType());
-=======
             Object value = resultSet.getObject(name); //, fields.get(i).getType());
             if(value == null){
                 value = ObjectUtility.getPrimitiveDefaultValue(fields.get(i).getType());
             }
->>>>>>> Stashed changes
             method.invoke(object, value);
         }
         return (T) object;
@@ -229,18 +221,12 @@ public class BddObject<T>  {
         Object object = this.getClass().getDeclaredConstructor().newInstance();
         for( int i = 0; i < fields.size() ; i++ ){
             String name = DaoUtility.getName(fields.get(i));
-<<<<<<< Updated upstream
-            // System.out.println(name);
-            Method method = methods.get(i);
-            Object value = resultSet.getObject( name , fields.get(i).getType());
-=======
             Method method = methods.get(i);
             Object value = resultSet.getObject(name);// , fields.get(i).getType());
             if(value == null){
                 value = ObjectUtility.getPrimitiveDefaultValue(fields.get(i).getType());
             }
             System.out.println(name+" = "+value);
->>>>>>> Stashed changes
             method.invoke(object, value);
         }
         return (T) object;
@@ -253,11 +239,13 @@ public class BddObject<T>  {
             state = true;
         }
         String[] detail = DaoUtility.getPrimaryKeyDetails(this);
+        if(detail[0].equals("true"))
+            return "default";
         Statement stmt = con.createStatement();
-        ResultSet rs = stmt.executeQuery("SELECT nextval('" + detail[1] + "')");
+        ResultSet rs = stmt.executeQuery("SELECT nextval('" + detail[2] + "')");
         rs.next();
-        String isa = ObjectUtility.fillZero(Integer.parseInt(detail[2]), Integer.parseInt(detail[3]), rs.getString(1));
+        String isa = ObjectUtility.fillZero(Integer.parseInt(detail[3]), Integer.parseInt(detail[4]), rs.getString(1));
         if(state == true) con.close();
-        return detail[0]+isa;
+        return detail[1]+isa;
     }
 }
