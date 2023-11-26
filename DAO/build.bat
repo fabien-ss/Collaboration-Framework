@@ -6,8 +6,8 @@ del file.txt
 del src.txt
 cd temp
 java test.Main
-jar -cf ..\DAO.jar .
+@REM jar -cf ..\DAO.jar .
 cd ..
-del /f temp
-move /y DAO.jar E:\ITU\Collaboration-Framework\DAO\
+@REM del /f temp
+@REM move /y DAO.jar E:\ITU\Collaboration-Framework\DAO\
 @REM del  DAO.jar 

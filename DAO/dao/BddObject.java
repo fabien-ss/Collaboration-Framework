@@ -183,7 +183,7 @@ public class BddObject<T>  {
         List<Field> fields = DaoUtility.getColumnFields(obj.getClass());
         List<Method> methods = DaoUtility.getAllSettersMethod(obj);
         while( rs.next() ){
-            T now = this.convertToObject(rs, fields, methods, obj);
+            T now = this.convertToObject(con, rs, fields, methods, obj);
             list.add(now);
         }
         if( state == true) con.close();
@@ -197,37 +197,46 @@ public class BddObject<T>  {
         List<Field> fields = DaoUtility.getColumnFields(this.getClass());
         List<Method> methods = DaoUtility.getAllSettersMethod(this);
         while( rs.next() ){
-            T now = this.convertToObject(rs, fields, methods);
+            T now = this.convertToObject(con, rs, fields, methods);
             list.add(now);
         }
         return list;
     }
     
-    private T convertToObject(ResultSet resultSet, List<Field> fields, List<Method> methods, Object obj) throws Exception{
+    private T convertToObject(Connection con, ResultSet resultSet, List<Field> fields, List<Method> methods, Object obj) throws Exception{
         Object object = obj.getClass().getDeclaredConstructor().newInstance();
-        for( int i = 0; i < fields.size() ; i++ ){
-            String name = DaoUtility.getName(fields.get(i));
-            Method method = methods.get(i);
-            Object value = resultSet.getObject(name); //, fields.get(i).getType());
-            if(value == null){
-                value = ObjectUtility.getPrimitiveDefaultValue(fields.get(i).getType());
+        List<String> columns = DaoUtility.getTableColumns(con, DaoUtility.getTableName(object));
+        for (String column : columns) {
+            for( int i = 0; i < fields.size() ; i++ ){
+                if(fields.get(i).getName().equals(ObjectUtility.formatString(column))){
+                    String name = DaoUtility.getName(fields.get(i));
+                    Method method = methods.get(i);
+                    Object value = resultSet.getObject(name); //, fields.get(i).getType());
+                    if(value == null){
+                        value = ObjectUtility.getPrimitiveDefaultValue(fields.get(i).getType());
+                    }
+                    method.invoke(object, value);
+                }
             }
-            method.invoke(object, value);
         }
         return (T) object;
     }
     
-    private T convertToObject(ResultSet resultSet, List<Field> fields, List<Method> methods) throws Exception{
-        Object object = this.getClass().getDeclaredConstructor().newInstance();
-        for( int i = 0; i < fields.size() ; i++ ){
-            String name = DaoUtility.getName(fields.get(i));
-            Method method = methods.get(i);
-            Object value = resultSet.getObject(name);// , fields.get(i).getType());
-            if(value == null){
-                value = ObjectUtility.getPrimitiveDefaultValue(fields.get(i).getType());
-            }
-            System.out.println(name+" = "+value);
-            method.invoke(object, value);
+    private T convertToObject(Connection con, ResultSet resultSet, List<Field> fields, List<Method> methods) throws Exception{
+        Object object = this.getClass().getDeclaredConstructor().newInstance();        
+        List<String> columns = DaoUtility.getTableColumns(con, DaoUtility.getTableName(object));
+        for (String column : columns) {
+            for( int i = 0; i < fields.size() ; i++ ){
+                if(fields.get(i).getName().equals(ObjectUtility.formatString(column))){
+                    String name = DaoUtility.getName(fields.get(i));
+                    Method method = methods.get(i);
+                    Object value = resultSet.getObject(name); //, fields.get(i).getType());
+                    if(value == null){
+                        value = ObjectUtility.getPrimitiveDefaultValue(fields.get(i).getType());
+                    }
+                    method.invoke(object, value);
+                }
+            }    
         }
         return (T) object;
     }   

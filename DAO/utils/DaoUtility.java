@@ -14,8 +14,11 @@ import java.util.ArrayList;
 import java.util.List;
 import static utils.ObjectUtility.capitalize;
 
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.HashMap;
 /**
  *
@@ -101,6 +104,20 @@ public class DaoUtility {
                 list[i] = ObjectUtility.capitalize(col.name());
         }
         return list;
+    }
+
+    public static List<String> getTableColumns(Connection con, String tableName) throws SQLException{
+        List<String> res = new ArrayList();
+        String query = "SELECT * FROM "+tableName;
+        
+        Statement stmt = con.createStatement();
+        ResultSet rs = stmt.executeQuery(query);
+        ResultSetMetaData rsmd = rs.getMetaData();
+        int count = rsmd.getColumnCount();
+        for(int i = 1; i <= count; i++){
+            res.add(rsmd.getColumnName(i));
+        }
+        return res;
     }
     
     public static String getListColumns(Object obj){

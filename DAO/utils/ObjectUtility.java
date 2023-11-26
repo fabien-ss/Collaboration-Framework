@@ -137,4 +137,15 @@ public class ObjectUtility {
             return null;  // Pour d'autres types primitifs, la valeur par défaut est null
         }
     }
+
+    public static String formatString(String column){
+        String[] splited = column.split("_");
+        if(splited.length <2)
+            return column;
+        String res = splited[0];
+        for(int i = 1; i < splited.length; i++){
+            res += capitalize(splited[i]);
+        }
+        return res;
+    }
 }

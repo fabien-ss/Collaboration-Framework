@@ -182,7 +182,7 @@ public class GenericDao{
         List<Field> fields = DaoUtility.getColumnFields(obj.getClass());
         List<Method> methods = DaoUtility.getAllSettersMethod(obj);
         while( rs.next() ){
-            T now = convertToObject(rs, fields, methods, obj);
+            T now = convertToObject(con, rs, fields, methods, obj);
             list.add(now);
         }
         if( state == true) con.close();
@@ -196,23 +196,28 @@ public class GenericDao{
         List<Field> fields = DaoUtility.getColumnFields(obj.getClass());
         List<Method> methods = DaoUtility.getAllSettersMethod(obj);
         while( rs.next() ){
-            T now = convertToObject(rs, fields, methods, obj);
+            T now = convertToObject(con, rs, fields, methods, obj);
             list.add(now);
         }
         return list;
     }
     
     @SuppressWarnings("unchecked")
-    private static <T> T convertToObject(ResultSet resultSet, List<Field> fields, List<Method> methods, Object obj) throws Exception{
+    private static <T> T convertToObject(Connection con, ResultSet resultSet, List<Field> fields, List<Method> methods, Object obj) throws Exception{
         Object object = obj.getClass().getDeclaredConstructor().newInstance();
-        for( int i = 0; i < fields.size() ; i++ ){
-            String name = DaoUtility.getName(fields.get(i));
-            Method method = methods.get(i);
-            Object value = resultSet.getObject(name); //, fields.get(i).getType());
-            if(value == null){
-                value = ObjectUtility.getPrimitiveDefaultValue(fields.get(i).getType());
-            }
-            method.invoke(object, value);
+        List<String> columns = DaoUtility.getTableColumns(con, DaoUtility.getTableName(object));
+        for (String column : columns) {
+            for( int i = 0; i < fields.size() ; i++ ){
+                if(fields.get(i).getName().equals(ObjectUtility.formatString(column))){
+                    String name = DaoUtility.getName(fields.get(i));
+                    Method method = methods.get(i);
+                    Object value = resultSet.getObject(name); //, fields.get(i).getType());
+                    if(value == null){
+                        value = ObjectUtility.getPrimitiveDefaultValue(fields.get(i).getType());
+                    }
+                    method.invoke(object, value);
+                }
+            }    
         }
         return (T) object;
     }
