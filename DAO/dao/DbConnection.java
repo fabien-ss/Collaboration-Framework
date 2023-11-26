@@ -57,9 +57,7 @@ public class DbConnection {
     
     //FUNCTION 
     public static void readFile()throws Exception{
-        String separator = "\\";
-        if(System.getProperty("os.name").equals("Linux"))
-            separator = "/";
+        String separator = File.separator;
         String confFile = System.getProperty("user.dir") + separator +"database.conf";
         List<String[]> lst = FileParser.readFile(confFile);
         for(String[] elt : lst ){
