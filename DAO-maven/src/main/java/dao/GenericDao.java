@@ -27,7 +27,7 @@ public class GenericDao{
     public static void save(Connection con, Object obj) throws Exception{
         boolean state = false;
         if(con == null){
-            con = new DbConnection().connect();
+            con = DbConnection.connect();
             state = true;
         }
         String query = "INSERT INTO "+DaoUtility.getTableName(obj)+DaoUtility.getListColumns(obj)+" VALUES (";
@@ -60,7 +60,7 @@ public class GenericDao{
     public static void delete(Connection con, Object obj) throws Exception {
         boolean state = false;
         if(con == null){
-            con = new DbConnection().connect();
+            con = DbConnection.connect();
             state = true;
         }
         String query = "DELETE FROM " + DaoUtility.getTableName(obj)+" WHERE " + DaoUtility.getPrimaryKeyName(obj)  + " = '" + DaoUtility.getPrimaryKeyGetMethod(obj).invoke(obj, (Object[]) null) + "'" ;
@@ -72,7 +72,7 @@ public class GenericDao{
     public static void deleteById(Connection con, Object id, Object obj) throws Exception{
         boolean state = false;
         if(con == null){
-            con = new DbConnection().connect();
+            con = DbConnection.connect();
             state = true;
         }
         String query = "DELETE FROM " + DaoUtility.getTableName(obj)+" WHERE " + DaoUtility.getPrimaryKeyName(obj)  +" = '" + id +"'";
@@ -84,7 +84,7 @@ public class GenericDao{
     public static void deleteWhere(Connection con, String condition, Object obj) throws Exception {
         boolean state = false;
         if(con == null){
-            con = new DbConnection().connect();
+            con = DbConnection.connect();
             state = true;
         }
         String query = "DELETE FROM " + DaoUtility.getTableName(obj) + " WHERE " + condition;
@@ -98,7 +98,7 @@ public class GenericDao{
     public static void update(Connection con,Object obj) throws Exception {
         boolean state = false;
         if(con == null){
-            con = new DbConnection().connect();
+            con = DbConnection.connect();
             state = true;
         }
         String query = "UPDATE "+ DaoUtility.getTableName(obj) +" SET ";
@@ -123,7 +123,7 @@ public class GenericDao{
     public static <T> List<T> findAll(Connection con, Object obj)throws Exception{
         boolean state = false;
         if(con == null){
-            con = new DbConnection().connect();
+            con = DbConnection.connect();
             state = true;
         }
         String query = "SELECT * FROM " + DaoUtility.getTableName(obj);
@@ -132,10 +132,22 @@ public class GenericDao{
         return list;
     }
     
+    public <T> List<T> findAllFromTable(Connection con, Object obj,String tableName)throws Exception{
+        boolean state = false;
+        if(con == null){
+            con = DbConnection.connect();
+            state = true;
+        }
+        String query = "SELECT * FROM " + tableName;
+        List<T> list = fetch(con, query, obj);
+        if( state == true) con.close();
+        return list;
+    }
+    
     public static <T> T findById(Connection con, Object id, Object obj)throws Exception{
         boolean state = false;
         if(con == null){
-            con = new DbConnection().connect();
+            con = DbConnection.connect();
             state = true;
         }
         String query = "SELECT * FROM " + DaoUtility.getTableName(obj) + " WHERE " + DaoUtility.getPrimaryKeyName(obj) + " = '" + id + "'";
@@ -148,7 +160,7 @@ public class GenericDao{
     public static <T> List<T>  findWhere(Connection con, String condition, Object obj) throws Exception {
         boolean state = false;
         if(con == null){
-            con = new DbConnection().connect();
+            con = DbConnection.connect();
             state = true;
         }
         String query = "SELECT * FROM " + DaoUtility.getTableName(obj) + " WHERE " + condition;
@@ -162,7 +174,7 @@ public class GenericDao{
     public void executeUpdate(Connection con, String query) throws Exception{
         boolean state = false;        
         if(con == null){
-            con = new DbConnection().connect();
+            con = DbConnection.connect();
             state = true;
         }
         Statement stmt =  con.createStatement();
@@ -173,7 +185,7 @@ public class GenericDao{
     public <T> List<T> executeQuery(Connection con, String query, Object obj) throws Exception{
         boolean state = false;
         if(con == null){
-            con = new DbConnection().connect();
+            con = DbConnection.connect();
             state = true;
         }
         List<T> list = new ArrayList<>();
@@ -240,7 +252,7 @@ public class GenericDao{
     public static  String constructPK(Connection con, Object obj)throws Exception{
         boolean state = false;
         if(con == null){
-            con = new DbConnection().connect();
+            con = DbConnection.connect();
             state = true;
         }
         String[] detail = DaoUtility.getPrimaryKeyDetails(obj);

@@ -71,6 +71,13 @@ public class DaoUtility {
         String str = obj.getClass().getName();
         return str.split("\\.")[str.split("\\.").length - 1];
     }
+
+    // public static void alterTableName(Object obj, String tableName){
+        // if(obj.getClass().isAnnotationPresent(Table.class)){
+            // Table annotation = obj.getClass().getAnnotation(Table.class);
+            // annotation.name(tableName);
+    //     }
+    // }
     
     //COLUMN
     public static List<Field> getColumnFields(Class objClass){

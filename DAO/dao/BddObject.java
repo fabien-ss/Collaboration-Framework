@@ -27,7 +27,7 @@ public class BddObject<T>  {
     public void save(Connection con) throws Exception{
         boolean state = false;
         if(con == null){
-            con = new DbConnection().connect();
+            con = DbConnection.connect();
             state = true;
         }
         String query = "INSERT INTO "+DaoUtility.getTableName(this)+DaoUtility.getListColumns(this)+" VALUES (";
@@ -61,7 +61,7 @@ public class BddObject<T>  {
     public void delete(Connection con) throws Exception {
         boolean state = false;
         if(con == null){
-            con = new DbConnection().connect();
+            con = DbConnection.connect();
             state = true;
         }
         String query = "DELETE FROM " + DaoUtility.getTableName(this)+" WHERE " + DaoUtility.getPrimaryKeyName(this)  + " = '" + DaoUtility.getPrimaryKeyGetMethod(this).invoke(this, (Object[]) null) + "'" ;
@@ -73,7 +73,7 @@ public class BddObject<T>  {
     public void deleteById(Connection con, Object id) throws Exception{
         boolean state = false;
         if(con == null){
-            con = new DbConnection().connect();
+            con = DbConnection.connect();
             state = true;
         }
         String query = "DELETE FROM " + DaoUtility.getTableName(this)+" WHERE " + DaoUtility.getPrimaryKeyName(this)  +" = '" + id +"'";
@@ -85,7 +85,7 @@ public class BddObject<T>  {
     public void deleteWhere(Connection con, String condition) throws Exception {
         boolean state = false;
         if(con == null){
-            con = new DbConnection().connect();
+            con = DbConnection.connect();
             state = true;
         }
         String query = "DELETE FROM " + DaoUtility.getTableName(this) + " WHERE " + condition;
@@ -99,7 +99,7 @@ public class BddObject<T>  {
     public void update(Connection con) throws Exception {
         boolean state = false;
         if(con == null){
-            con = new DbConnection().connect();
+            con = DbConnection.connect();
             state = true;
         }
         String query = "UPDATE "+ DaoUtility.getTableName(this) +" SET ";
@@ -124,10 +124,21 @@ public class BddObject<T>  {
     public List<T> findAll(Connection con)throws Exception{
         boolean state = false;
         if(con == null){
-            con = new DbConnection().connect();
+            con = DbConnection.connect();
             state = true;
         }
         String query = "SELECT * FROM " + DaoUtility.getTableName(this);
+        List<T> list = this.fetch(con, query);
+        if( state == true) con.close();
+        return list;
+    }
+    public List<T> findAllFromTable(Connection con, String tableName)throws Exception{
+        boolean state = false;
+        if(con == null){
+            con = DbConnection.connect();
+            state = true;
+        }
+        String query = "SELECT * FROM " + tableName;
         List<T> list = this.fetch(con, query);
         if( state == true) con.close();
         return list;
@@ -136,7 +147,7 @@ public class BddObject<T>  {
     public T findById(Connection con, Object id)throws Exception{
         boolean state = false;
         if(con == null){
-            con = new DbConnection().connect();
+            con = DbConnection.connect();
             state = true;
         }
         String query = "SELECT * FROM " + DaoUtility.getTableName(this) + " WHERE " + DaoUtility.getPrimaryKeyName(this) + " = '" + id + "'";
@@ -149,7 +160,7 @@ public class BddObject<T>  {
     public List<T> findWhere(Connection con, String condition) throws Exception {
         boolean state = false;
         if(con == null){
-            con = new DbConnection().connect();
+            con = DbConnection.connect();
             state = true;
         }
         String query = "SELECT * FROM " + DaoUtility.getTableName(this) + " WHERE " + condition;
@@ -163,7 +174,7 @@ public class BddObject<T>  {
     public void executeUpdate(Connection con, String query) throws Exception{
         boolean state = false;        
         if(con == null){
-            con = new DbConnection().connect();
+            con = DbConnection.connect();
             state = true;
         }
         Statement stmt =  con.createStatement();
@@ -174,7 +185,7 @@ public class BddObject<T>  {
     public List<T> executeQuery(Connection con, String query, Object obj) throws Exception{
         boolean state = false;
         if(con == null){
-            con = new DbConnection().connect();
+            con = DbConnection.connect();
             state = true;
         }
         List<T> list = new ArrayList<>();
@@ -244,7 +255,7 @@ public class BddObject<T>  {
     public String constructPK(Connection con)throws Exception{
         boolean state = false;
         if(con == null){
-            con = new DbConnection().connect();
+            con = DbConnection.connect();
             state = true;
         }
         String[] detail = DaoUtility.getPrimaryKeyDetails(this);

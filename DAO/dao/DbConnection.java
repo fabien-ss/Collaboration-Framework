@@ -6,6 +6,8 @@ package dao;
 
 import java.util.List;
 import parser.FileParser;
+
+import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
 /**
