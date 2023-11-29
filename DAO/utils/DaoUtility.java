@@ -8,19 +8,59 @@ import annotation.Table;
 import annotation.Column;
 import annotation.PrimaryKey;
 
-import dao.BddObject;
-
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import static utils.ObjectUtility.capitalize;
 
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.HashMap;
 /**
  *
  * @author Mamisoa
  */
 public class DaoUtility {
+    
+    public static void mergeTwoObject(Object o1, Object o2) throws Exception {
+        Field[] fields = o2.getClass().getDeclaredFields();
+        for (int i = 0; i < fields.length; i++) {
+            Method method = o2.getClass().getDeclaredMethod("get"+ObjectUtility.capitalize(fields[i].getName()));
+            if(!ObjectUtility.isAtDefaultValue(method, o2)){
+                fields[i].setAccessible(true);
+                fields[i].set(o1, method.invoke(o2));
+                fields[i].setAccessible(false);
+            }
+        }
+    }
+    
+    public static String getFieldColumnName(Field field) {
+        if(field.isAnnotationPresent(Column.class)) {
+            Column column = field.getAnnotation(Column.class);
+            if(!column.name().equals("")){
+                return column.name();
+            }
+        }
+        return field.getName();
+    }
+
+    public static String getConditionByAttributeValue(Object obj) throws Exception{
+        String condition = " WHERE ";
+        Field[] fields = obj.getClass().getDeclaredFields();
+        List<Method> lst = getAllGettersMethod(obj);
+        for (int i = 0; i < lst.size(); i++) {
+            if(!ObjectUtility.isAtDefaultValue(lst.get(i), obj)){
+                if(fields[i].isAnnotationPresent(Column.class)){
+                    condition += getFieldColumnName(fields[i]) + " = '" + lst.get(i).invoke(obj) + "' AND ";
+                }
+            }
+        }
+        return condition.substring(0, condition.length() - 5);
+    }
     
     //TABLE
     public static String getTableName(Object obj){
@@ -35,7 +75,7 @@ public class DaoUtility {
     //COLUMN
     public static List<Field> getColumnFields(Class objClass){
         List<Field> lst = new ArrayList<>();
-        while(objClass != BddObject.class){
+        while(objClass != Object.class){
             for(Field declaredField : objClass.getDeclaredFields()) {
                 if (declaredField.isAnnotationPresent(Column.class)) {
                     lst.add(declaredField);
@@ -64,6 +104,20 @@ public class DaoUtility {
                 list[i] = ObjectUtility.capitalize(col.name());
         }
         return list;
+    }
+
+    public static List<String> getTableColumns(Connection con, String tableName) throws SQLException{
+        List<String> res = new ArrayList();
+        String query = "SELECT * FROM "+tableName;
+        
+        Statement stmt = con.createStatement();
+        ResultSet rs = stmt.executeQuery(query);
+        ResultSetMetaData rsmd = rs.getMetaData();
+        int count = rsmd.getColumnCount();
+        for(int i = 1; i <= count; i++){
+            res.add(rsmd.getColumnName(i));
+        }
+        return res;
     }
     
     public static String getListColumns(Object obj){
@@ -114,14 +168,15 @@ public class DaoUtility {
         return null;
     }
     public static String[] getPrimaryKeyDetails(Object obj) throws Exception{
-        String[] lst = new String[4];
+        String[] lst = new String[5];
         Field field = getPrimaryKeyField(obj);
         PrimaryKey pk = field.getAnnotation(PrimaryKey.class);
         String prefix = pk.prefix();
-        lst[0] = prefix;
-        lst[1] = pk.sequence();
-        lst[2] = ""+pk.length();
-        lst[3] = ""+prefix.length();
+        lst[0] = ""+pk.autoIncrement();
+        lst[1] = prefix;
+        lst[2] = pk.sequence();
+        lst[3] = ""+pk.length();
+        lst[4] = ""+prefix.length();
         return lst;
     }
     //OTHERS (GETTERS AND SETTERS)
@@ -139,7 +194,7 @@ public class DaoUtility {
     public static List<Method> getAllGettersMethod(Object obj) throws Exception{
         Class objClass = obj.getClass();
         List<Method> res = new ArrayList<>();
-        while(objClass != BddObject.class){
+        while(objClass != Object.class){
             res.addAll(getGettersMethod(objClass));
             objClass = objClass.getSuperclass();
         }
@@ -155,11 +210,31 @@ public class DaoUtility {
     public static List<Method> getAllSettersMethod(Object obj) throws Exception{
         Class objClass = obj.getClass();
         List<Method> res = new ArrayList<>();
-        while(objClass != BddObject.class){
+        while(objClass != Object.class){
             res.addAll(getSettersMethod(objClass));
             // System.out.println(res);
             objClass = objClass.getSuperclass();
         }
         return res;
     }
+    
+    public static int getColumnCount(ResultSet rs) throws Exception{
+        ResultSetMetaData rsmd = rs.getMetaData();
+        return rsmd.getColumnCount();
+    }
+    
+    public static HashMap<String, Class> getColumnNameAndType(ResultSet rs) throws Exception{
+        HashMap<String, Class> map = new HashMap<>();
+        HashMap<Integer, Class> mapping = ClassMapping.getClassMapTable();
+        
+        ResultSetMetaData rsmd = rs.getMetaData();
+        int count = rsmd.getColumnCount();
+        
+        for(int i = 1; i <= count; i++){
+            Integer key = rsmd.getColumnType(i);
+            String column = rsmd.getColumnName(i);
+            map.put(column, mapping.get(key));
+        }
+        return map;
+    }   
 }

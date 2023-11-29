@@ -16,7 +16,8 @@ import java.lang.annotation.Target;
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface PrimaryKey {
-    String prefix();
-    String sequence();
-    int length(); 
+    String prefix() default "DEF";
+    String sequence() default "sequence";
+    int length() default 8;
+    boolean autoIncrement() default false; 
 }

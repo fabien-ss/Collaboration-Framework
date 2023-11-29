@@ -23,7 +23,7 @@ import utils.ObjectUtility;
  * @param <T>
  */
 public class BddObject<T>  {
-    //INSERT
+    //INSERT 
     public void save(Connection con) throws Exception{
         boolean state = false;
         if(con == null){
@@ -32,11 +32,17 @@ public class BddObject<T>  {
         }
         String query = "INSERT INTO "+DaoUtility.getTableName(this)+DaoUtility.getListColumns(this)+" VALUES (";
         List<Method> lst = DaoUtility.getAllGettersMethod(this);
+        System.out.println(lst);
         for(Method method : lst){
             Class<?> returnParam = method.getReturnType();
-            if(method.equals(DaoUtility.getPrimaryKeyGetMethod(this)) && method.invoke(this, (Object[]) null) == null){
-                DaoUtility.setPrimaryKey(this).invoke(this, this.constructPK(con));     
-                query += "'" + DaoUtility.getPrimaryKeyGetMethod(this).invoke(this, (Object[]) null) + "'";  
+            // System.out.println(method.getName());
+            if(method.equals(DaoUtility.getPrimaryKeyGetMethod(this)) && method.invoke(this, (Object[]) null) == null && returnParam.equals(String.class)){
+                query += "'" + constructPK(con) + "'";  
+            }else if(method.equals(DaoUtility.getPrimaryKeyGetMethod(this)) && method.invoke(this, (Object[]) null) == null && returnParam.equals(Integer.class)){
+                query += constructPK(con);
+            }
+            else if(method.invoke(this, (Object[]) null) == null){
+                query += "default";
             }
             else if(returnParam.equals(java.sql.Date.class))
                 query += "TO_DATE('" + method.invoke(this, (Object[]) null) + "', 'YYYY-MM-DD')";
@@ -102,14 +108,14 @@ public class BddObject<T>  {
         for( int i = 0; i < methods.size(); i++ ){
             Class returnParam = methods.get(i).getReturnType();
             if(returnParam.equals(java.util.Date.class) || returnParam.equals(java.sql.Date.class))
-                query += fields.get(i) + " = TO_DATE('" + methods.get(i).invoke(this, (Object[]) null)+"','YYYY-MM-DD')";
+                query += fields.get(i).getName() + " = TO_DATE('" + methods.get(i).invoke(this, (Object[]) null)+"','YYYY-MM-DD')";
             else
-                query += fields.get(i) + " = '"+methods.get(i).invoke(this, (Object[]) null)+"'"; 
+                query += fields.get(i).getName() + " = '"+methods.get(i).invoke(this, (Object[]) null)+"'"; 
             query = query + ",";
         }
         query = query.substring(0, query.lastIndexOf(','));
-        query += " WHERE " + DaoUtility.getTableName(this) +" = '" + DaoUtility.getPrimaryKeyGetMethod(this).invoke( this, (Object[]) null)+"'";
-       System.out.println(query);
+        query += " WHERE " + DaoUtility.getPrimaryKeyName(this) +" = '" + DaoUtility.getPrimaryKeyGetMethod(this).invoke( this, (Object[]) null)+"'";
+        System.out.println(query);
         Statement stmt = con.createStatement();
         stmt.executeUpdate(query);
         if( state == true) con.close();
@@ -161,6 +167,7 @@ public class BddObject<T>  {
             state = true;
         }
         Statement stmt =  con.createStatement();
+        System.out.println(query);
         stmt.executeUpdate(query);
         if( state == true) con.close();
     }
@@ -176,7 +183,7 @@ public class BddObject<T>  {
         List<Field> fields = DaoUtility.getColumnFields(obj.getClass());
         List<Method> methods = DaoUtility.getAllSettersMethod(obj);
         while( rs.next() ){
-            T now = this.convertToObject(rs, fields, methods, obj);
+            T now = this.convertToObject(con, rs, fields, methods, obj);
             list.add(now);
         }
         if( state == true) con.close();
@@ -190,31 +197,46 @@ public class BddObject<T>  {
         List<Field> fields = DaoUtility.getColumnFields(this.getClass());
         List<Method> methods = DaoUtility.getAllSettersMethod(this);
         while( rs.next() ){
-            T now = this.convertToObject(rs, fields, methods);
+            T now = this.convertToObject(con, rs, fields, methods);
             list.add(now);
         }
         return list;
     }
     
-    private T convertToObject(ResultSet resultSet, List<Field> fields, List<Method> methods, Object obj) throws Exception{
+    private T convertToObject(Connection con, ResultSet resultSet, List<Field> fields, List<Method> methods, Object obj) throws Exception{
         Object object = obj.getClass().getDeclaredConstructor().newInstance();
-        for( int i = 0; i < fields.size() ; i++ ){
-            String name = DaoUtility.getName(fields.get(i));
-            Method method = methods.get(i);
-            Object value = resultSet.getObject( name , fields.get(i).getType());
-            method.invoke(object, value);
+        List<String> columns = DaoUtility.getTableColumns(con, DaoUtility.getTableName(object));
+        for (String column : columns) {
+            for( int i = 0; i < fields.size() ; i++ ){
+                if(fields.get(i).getName().equals(ObjectUtility.formatString(column))){
+                    String name = DaoUtility.getName(fields.get(i));
+                    Method method = methods.get(i);
+                    Object value = resultSet.getObject(name); //, fields.get(i).getType());
+                    if(value == null){
+                        value = ObjectUtility.getPrimitiveDefaultValue(fields.get(i).getType());
+                    }
+                    method.invoke(object, value);
+                }
+            }
         }
         return (T) object;
     }
     
-    private T convertToObject(ResultSet resultSet, List<Field> fields, List<Method> methods) throws Exception{
-        Object object = this.getClass().getDeclaredConstructor().newInstance();
-        for( int i = 0; i < fields.size() ; i++ ){
-            String name = DaoUtility.getName(fields.get(i));
-            // System.out.println(name);
-            Method method = methods.get(i);
-            Object value = resultSet.getObject( name , fields.get(i).getType());
-            method.invoke(object, value);
+    private T convertToObject(Connection con, ResultSet resultSet, List<Field> fields, List<Method> methods) throws Exception{
+        Object object = this.getClass().getDeclaredConstructor().newInstance();        
+        List<String> columns = DaoUtility.getTableColumns(con, DaoUtility.getTableName(object));
+        for (String column : columns) {
+            for( int i = 0; i < fields.size() ; i++ ){
+                if(fields.get(i).getName().equals(ObjectUtility.formatString(column))){
+                    String name = DaoUtility.getName(fields.get(i));
+                    Method method = methods.get(i);
+                    Object value = resultSet.getObject(name); //, fields.get(i).getType());
+                    if(value == null){
+                        value = ObjectUtility.getPrimitiveDefaultValue(fields.get(i).getType());
+                    }
+                    method.invoke(object, value);
+                }
+            }    
         }
         return (T) object;
     }   
@@ -226,11 +248,13 @@ public class BddObject<T>  {
             state = true;
         }
         String[] detail = DaoUtility.getPrimaryKeyDetails(this);
+        if(detail[0].equals("true"))
+            return "default";
         Statement stmt = con.createStatement();
-        ResultSet rs = stmt.executeQuery("SELECT nextval('" + detail[1] + "')");
+        ResultSet rs = stmt.executeQuery("SELECT nextval('" + detail[2] + "')");
         rs.next();
-        String isa = ObjectUtility.fillZero(Integer.parseInt(detail[2]), Integer.parseInt(detail[3]), rs.getString(1));
+        String isa = ObjectUtility.fillZero(Integer.parseInt(detail[3]), Integer.parseInt(detail[4]), rs.getString(1));
         if(state == true) con.close();
-        return detail[0]+isa;
+        return detail[1]+isa;
     }
 }

@@ -13,51 +13,54 @@ import java.sql.DriverManager;
  * @author Mamisoa
  */
 public class DbConnection {
-    String datasource;
-    String driver;
-    String username;
-    String password;
+    static String datasource;
+    static String driver;
+    static String username;
+    static String password;
 
     //SETTERS and GETTERS
 
-    public String getDatasource() {
+    public static String getDatasource() {
         return datasource;
     }
 
-    public void setDatasource(String datasource) {
-        this.datasource = datasource;
+    public static void setDatasource(String datasource) {
+        DbConnection.datasource = datasource;
     }
 
-    public String getDriver() {
+    public static String getDriver() {
         return driver;
     }
 
-    public void setDriver(String driver) {
-        this.driver = driver;
+    public static void setDriver(String driver) {
+        DbConnection.driver = driver;
     }
 
-    public String getUsername() {
+    public static String getUsername() {
         return username;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    public static void setUsername(String username) {
+        DbConnection.username = username;
     }
 
-    public String getPassword() {
+    public static String getPassword() {
         return password;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
+    public static void setPassword(String password) {
+        DbConnection.password = password;
     }
 
     //CONSTRUCTOR
     public DbConnection(){}
     
     //FUNCTION 
-    public void readFile()throws Exception{
-        String confFile = System.getProperty("user.dir") + "\\database.conf";
+    public static void readFile()throws Exception{
+        String separator = "\\";
+        if(System.getProperty("os.name").equals("Linux"))
+            separator = "/";
+        String confFile = System.getProperty("user.dir") + separator +"database.conf";
         List<String[]> lst = FileParser.readFile(confFile);
         for(String[] elt : lst ){
             switch (elt[0]) {
@@ -79,7 +82,7 @@ public class DbConnection {
         }
     }
     
-    public Connection connect()throws Exception{
+    public static Connection connect()throws Exception{
         readFile(); 
         Class.forName(getDriver());
         Connection con = DriverManager.getConnection(getDatasource(),getUsername(),getPassword());
