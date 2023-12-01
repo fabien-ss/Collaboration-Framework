@@ -180,6 +180,23 @@ public class BddObject<T>  {
             if(state == true) con.close();
         }
     }
+    // search line to print
+    public List<T> findWhere(Connection con) throws Exception{
+        boolean state = false;
+        try{
+            if(con == null){
+                con = new DbConnection().connect();
+                state = true;
+            }
+            String condition = DaoUtility.getConditionByAttributeValue(this);
+            String query = "SELECT * FROM " + DaoUtility.getTableName(this) + condition;
+            System.out.println(query);
+            List<T> lst = this.fetch(con, query);
+            return lst;
+        }finally{
+            if( state == true) con.close();
+        }
+    }
     
     public List<T> findWhere(Connection con, String condition) throws Exception {
         boolean state = false;

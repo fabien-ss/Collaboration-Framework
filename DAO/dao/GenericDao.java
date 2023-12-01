@@ -7,7 +7,6 @@ package dao;
 import java.sql.Connection;
 import java.sql.Statement;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
@@ -176,6 +175,24 @@ public class GenericDao{
         }finally {
             if(state == true) con.close();
         }    
+    }
+    
+    // search line to print
+    public <T> List<T> findWhere(Connection con, Object obj) throws Exception{
+        boolean state = false;
+        try{
+            if(con == null){
+                con = new DbConnection().connect();
+                state = true;
+            }
+            String condition = DaoUtility.getConditionByAttributeValue(this);
+            String query = "SELECT * FROM " + DaoUtility.getTableName(this) + condition;
+            System.out.println(query);
+            List<T> lst = fetch(con, query, obj);
+            return lst;
+        }finally{
+            if( state == true) con.close();
+        }
     }
     
     public static <T> List<T>  findWhere(Connection con, String condition, Object obj) throws Exception {
