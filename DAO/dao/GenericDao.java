@@ -44,12 +44,12 @@ public class GenericDao{
             else if(returnParam.equals(java.sql.Date.class))
             query += "TO_DATE('" + method.invoke(obj, (Object[]) null) + "', 'YYYY-MM-DD')";
             else
-            query += "'" + method.invoke(obj, (Object[]) null) + "'"; 
+                query += "'" + method.invoke(obj, (Object[]) null) + "'"; 
             query = query + ", ";
         }
         query = query.substring(0, query.lastIndexOf(','));
         query = query + ")";
-        System.out.println(query);
+        // System.out.println(query);
         Statement stmt =  con.createStatement();
         stmt.executeUpdate(query);
         if( state == true) con.close();
@@ -64,7 +64,7 @@ public class GenericDao{
                 state = true;
             }
             String query = "DELETE FROM " + DaoUtility.getTableName(obj)+" WHERE " + DaoUtility.getPrimaryKeyName(obj)  + " = '" + DaoUtility.getPrimaryKeyGetMethod(obj).invoke(obj, (Object[]) null) + "'" ;
-    //        System.out.println(query);
+           System.out.println(query);
             Statement stmt = con.createStatement();
             stmt.executeUpdate(query);
         }finally {
@@ -79,7 +79,7 @@ public class GenericDao{
                 state = true;
             }
             String query = "DELETE FROM " + DaoUtility.getTableName(obj)+" WHERE " + DaoUtility.getPrimaryKeyName(obj)  +" = '" + id +"'";
-        System.out.println(query);
+        // System.out.println(query);
             Statement stmt = con.createStatement();
             stmt.executeUpdate(query);
         }finally {
@@ -94,7 +94,7 @@ public class GenericDao{
                 state = true;
             }
             String query = "DELETE FROM " + DaoUtility.getTableName(obj) + " WHERE " + condition;
-            System.out.println(query);
+            // System.out.println(query);
             Statement stmt = con.createStatement();
             stmt.executeUpdate(query);
         }finally {
@@ -114,16 +114,11 @@ public class GenericDao{
             List<Method> methods = DaoUtility.getAllGettersMethod(obj);
             List<Field> fields = DaoUtility.getColumnFields(obj.getClass());
             for( int i = 0; i < methods.size(); i++ ){
-                Class returnParam = methods.get(i).getReturnType();
-                if(returnParam.equals(java.util.Date.class) || returnParam.equals(java.sql.Date.class))
-                    query += fields.get(i).getName() + " = TO_DATE('" + methods.get(i).invoke(obj, (Object[]) null)+"','YYYY-MM-DD')";
-                else
-                    query += fields.get(i).getName() + " = '"+methods.get(i).invoke(obj, (Object[]) null)+"'"; 
-                query = query + ",";
+                query += fields.get(i).getName() + " = '"+methods.get(i).invoke(obj, (Object[]) null)+"', ";
             }
             query = query.substring(0, query.lastIndexOf(','));
             query += " WHERE " + DaoUtility.getPrimaryKeyName(obj) +" = '" + DaoUtility.getPrimaryKeyGetMethod(obj).invoke( obj, (Object[]) null)+"'";
-            System.out.println(query);
+            // System.out.println(query);
             Statement stmt = con.createStatement();
             stmt.executeUpdate(query);
         }finally {
@@ -170,7 +165,7 @@ public class GenericDao{
             }
             String query = "SELECT * FROM " + DaoUtility.getTableName(obj) + " WHERE " + DaoUtility.getPrimaryKeyName(obj) + " = '" + id + "'";
             T temp = (T) fetch(con, query, obj).get(0);
-            System.out.println(query);
+            // System.out.println(query);
             return temp;
         }finally {
             if(state == true) con.close();
@@ -178,16 +173,17 @@ public class GenericDao{
     }
     
     // search line to print
-    public <T> List<T> findWhere(Connection con, Object obj) throws Exception{
+    public static <T> List<T> findWhere(Connection con, Object obj) throws Exception{
         boolean state = false;
         try{
             if(con == null){
                 con = new DbConnection().connect();
                 state = true;
             }
-            String condition = DaoUtility.getConditionByAttributeValue(this);
-            String query = "SELECT * FROM " + DaoUtility.getTableName(this) + condition;
-            System.out.println(query);
+            
+            String condition = DaoUtility.getConditionByAttributeValue(obj);
+            String query = "SELECT * FROM " + DaoUtility.getTableName(obj) + condition;
+            // System.out.println(query);
             List<T> lst = fetch(con, query, obj);
             return lst;
         }finally{
@@ -203,7 +199,7 @@ public class GenericDao{
                 state = true;
             }
             String query = "SELECT * FROM " + DaoUtility.getTableName(obj) + " WHERE " + condition;
-            System.out.println(query);
+            // System.out.println(query);
             List<T>  lst = fetch(con, query, obj);
             return lst;
         }finally {
@@ -212,7 +208,7 @@ public class GenericDao{
     }
     
     //OTHERS
-    public void executeUpdate(Connection con, String query) throws Exception{
+    public static void executeUpdate(Connection con, String query) throws Exception{
         boolean state = false;  
         try{      
             if(con == null){
@@ -220,13 +216,13 @@ public class GenericDao{
                 state = true;
             }
             Statement stmt =  con.createStatement();
-            System.out.println(query);
+            // System.out.println(query);
             stmt.executeUpdate(query);
         }finally {
             if(state == true) con.close();
         }    
     }
-    public <T> List<T> executeQuery(Connection con, String query, Object obj) throws Exception{
+    public static <T> List<T> executeQuery(Connection con, String query, Object obj) throws Exception{
         boolean state = false;
         try{
             if(con == null){
