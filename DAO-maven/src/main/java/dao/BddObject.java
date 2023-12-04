@@ -61,7 +61,7 @@ public class BddObject<T>  {
                 if(state == true) con.close();
         }
     }
-    
+
     //DELETE
     public void delete(Connection con) throws Exception {
         boolean state = false;
@@ -106,7 +106,8 @@ public class BddObject<T>  {
             stmt.executeUpdate(query);
         }finally {
             if(state == true) con.close();
-    }    }
+        }   
+    }
     
     //UPDATE
     public void update(Connection con) throws Exception {
@@ -159,7 +160,7 @@ public class BddObject<T>  {
         if(state == true) con.close();
         return list;
     }
-    
+
     public T findById(Connection con, Object id)throws Exception{
         boolean state = false;
         try{
@@ -193,7 +194,7 @@ public class BddObject<T>  {
             if( state == true) con.close();
         }
     }
-    
+
     public List<T> findWhere(Connection con, String condition) throws Exception {
         boolean state = false;
         try{
@@ -209,7 +210,7 @@ public class BddObject<T>  {
                 if(state == true) con.close();
         }
     }
-    
+
     //OTHERS
     public void executeUpdate(Connection con, String query) throws Exception{
         boolean state = false;   
@@ -246,7 +247,7 @@ public class BddObject<T>  {
                 if(state == true) con.close();
         }
     }
-    
+
     public List<T> fetch( Connection con, String query ) throws Exception{
         List<T> list = new ArrayList<>();
         Statement stmt = con.createStatement();
@@ -259,7 +260,7 @@ public class BddObject<T>  {
         }
         return list;
     }
-    
+
     private T convertToObject(Connection con, ResultSet resultSet, List<Field> fields, List<Method> methods, Object obj) throws Exception{
         Object object = obj.getClass().getDeclaredConstructor().newInstance();
         List<String> columns = DaoUtility.getTableColumns(con, DaoUtility.getTableName(object));
@@ -278,9 +279,9 @@ public class BddObject<T>  {
         }
         return (T) object;
     }
-    
+
     private T convertToObject(Connection con, ResultSet resultSet, List<Field> fields, List<Method> methods) throws Exception{
-        Object object = this.getClass().getDeclaredConstructor().newInstance();        
+        Object object = this.getClass().getDeclaredConstructor().newInstance();
         List<String> columns = DaoUtility.getTableColumns(con, DaoUtility.getTableName(object));
         for (String column : columns) {
             for( int i = 0; i < fields.size() ; i++ ){
@@ -293,11 +294,11 @@ public class BddObject<T>  {
                     }
                     method.invoke(object, value);
                 }
-            }    
+            }
         }
         return (T) object;
-    }   
-        
+    }
+
     public String constructPK(Connection con)throws Exception{
         boolean state = false;
         try{
