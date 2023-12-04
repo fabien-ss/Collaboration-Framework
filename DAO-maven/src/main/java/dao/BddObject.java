@@ -23,7 +23,7 @@ import utils.ObjectUtility;
  * @param <T>
  */
 public class BddObject<T>  {
-    //INSERT 
+    //INSERT
     public void save(Connection con) throws Exception{
         boolean state = false;
         if(con == null){
@@ -37,7 +37,7 @@ public class BddObject<T>  {
             Class<?> returnParam = method.getReturnType();
             // System.out.println(method.getName());
             if(method.equals(DaoUtility.getPrimaryKeyGetMethod(this)) && method.invoke(this, (Object[]) null) == null && returnParam.equals(String.class)){
-                query += "'" + constructPK(con) + "'";  
+                query += "'" + constructPK(con) + "'";
             }else if(method.equals(DaoUtility.getPrimaryKeyGetMethod(this)) && method.invoke(this, (Object[]) null) == null && returnParam.equals(Integer.class)){
                 query += constructPK(con);
             }
@@ -47,7 +47,7 @@ public class BddObject<T>  {
             else if(returnParam.equals(java.sql.Date.class))
                 query += "TO_DATE('" + method.invoke(this, (Object[]) null) + "', 'YYYY-MM-DD')";
             else
-                query += "'" + method.invoke(this, (Object[]) null) + "'"; 
+                query += "'" + method.invoke(this, (Object[]) null) + "'";
             query = query + ", ";
         }
         query = query.substring(0, query.lastIndexOf(','));
@@ -56,7 +56,7 @@ public class BddObject<T>  {
         stmt.executeUpdate(query);
         if( state == true) con.close();
     }
-    
+
     //DELETE
     public void delete(Connection con) throws Exception {
         boolean state = false;
@@ -94,7 +94,7 @@ public class BddObject<T>  {
         stmt.executeUpdate(query);
         if( state == true) con.close();
     }
-    
+
     //UPDATE
     public void update(Connection con) throws Exception {
         boolean state = false;
@@ -110,7 +110,7 @@ public class BddObject<T>  {
             if(returnParam.equals(java.util.Date.class) || returnParam.equals(java.sql.Date.class))
                 query += fields.get(i).getName() + " = TO_DATE('" + methods.get(i).invoke(this, (Object[]) null)+"','YYYY-MM-DD')";
             else
-                query += fields.get(i).getName() + " = '"+methods.get(i).invoke(this, (Object[]) null)+"'"; 
+                query += fields.get(i).getName() + " = '"+methods.get(i).invoke(this, (Object[]) null)+"'";
             query = query + ",";
         }
         query = query.substring(0, query.lastIndexOf(','));
@@ -143,7 +143,7 @@ public class BddObject<T>  {
         if( state == true) con.close();
         return list;
     }
-    
+
     public T findById(Connection con, Object id)throws Exception{
         boolean state = false;
         if(con == null){
@@ -156,7 +156,7 @@ public class BddObject<T>  {
         if( state == true) con.close();
         return (T) obj;
     }
-    
+
     public List<T> findWhere(Connection con, String condition) throws Exception {
         boolean state = false;
         if(con == null){
@@ -169,10 +169,10 @@ public class BddObject<T>  {
         if( state == true) con.close();
         return lst;
     }
-    
+
     //OTHERS
     public void executeUpdate(Connection con, String query) throws Exception{
-        boolean state = false;        
+        boolean state = false;
         if(con == null){
             con = DbConnection.connect();
             state = true;
@@ -200,7 +200,7 @@ public class BddObject<T>  {
         if( state == true) con.close();
         return list;
     }
-    
+
     public List<T> fetch( Connection con, String query ) throws Exception{
         List<T> list = new ArrayList<>();
         Statement stmt = con.createStatement();
@@ -213,7 +213,7 @@ public class BddObject<T>  {
         }
         return list;
     }
-    
+
     private T convertToObject(Connection con, ResultSet resultSet, List<Field> fields, List<Method> methods, Object obj) throws Exception{
         Object object = obj.getClass().getDeclaredConstructor().newInstance();
         List<String> columns = DaoUtility.getTableColumns(con, DaoUtility.getTableName(object));
@@ -232,9 +232,9 @@ public class BddObject<T>  {
         }
         return (T) object;
     }
-    
+
     private T convertToObject(Connection con, ResultSet resultSet, List<Field> fields, List<Method> methods) throws Exception{
-        Object object = this.getClass().getDeclaredConstructor().newInstance();        
+        Object object = this.getClass().getDeclaredConstructor().newInstance();
         List<String> columns = DaoUtility.getTableColumns(con, DaoUtility.getTableName(object));
         for (String column : columns) {
             for( int i = 0; i < fields.size() ; i++ ){
@@ -247,11 +247,11 @@ public class BddObject<T>  {
                     }
                     method.invoke(object, value);
                 }
-            }    
+            }
         }
         return (T) object;
-    }   
-        
+    }
+
     public String constructPK(Connection con)throws Exception{
         boolean state = false;
         if(con == null){
