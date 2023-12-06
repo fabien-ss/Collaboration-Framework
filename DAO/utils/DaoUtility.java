@@ -5,6 +5,7 @@
 package utils;
 
 import annotation.Table;
+import dao.DbConnection;
 import annotation.Column;
 import annotation.PrimaryKey;
 
@@ -115,18 +116,24 @@ public class DaoUtility {
         return list;
     }
 
-    public static List<String> getTableColumns(Connection con, String tableName) throws SQLException{
-        List<String> res = new ArrayList<>();
-        String query = "SELECT * FROM "+tableName;
-        
-        Statement stmt = con.createStatement();
-        ResultSet rs = stmt.executeQuery(query);
-        ResultSetMetaData rsmd = rs.getMetaData();
-        int count = rsmd.getColumnCount();
-        for(int i = 1; i <= count; i++){
-            res.add(rsmd.getColumnName(i));
+    public static List<String> getTableColumns(String tableName) throws Exception{
+        Connection con = null;
+        try{
+            con = DbConnection.connect();
+            List<String> res = new ArrayList<>();
+            String query = "SELECT * FROM "+tableName;
+            
+            Statement stmt = con.createStatement();
+            ResultSet rs = stmt.executeQuery(query);
+            ResultSetMetaData rsmd = rs.getMetaData();
+            int count = rsmd.getColumnCount();
+            for(int i = 1; i <= count; i++){
+                res.add(rsmd.getColumnName(i));
+            }
+            return res;
+        }finally{
+            con.close();
         }
-        return res;
     }
     
     public static String getListColumns(Object obj) throws Exception{
