@@ -3,47 +3,28 @@ package test;
 import annotation.PrimaryKey;
 import annotation.Column;
 import annotation.Table;
-import dao.BddObject;
 
-@Table(name = "v_test")
-public class Test2 extends BddObject{
-    
-	@Column(name = "teny")
-	String teny;
-	@Column(name = "cucu")
-	Double cucu;
-	@PrimaryKey(sequence = "seq_id2")
-	@Column(name = "id")
-	String id;
+@Table(name = "test_2")
+public class Test2 extends Test{
+    @PrimaryKey(name = "id_2", autoIncrement = true)
+    Integer id2;
+    @Column(name = "teny_2")
+    String teny2;
 
-    //SETTERS AND GETTERS
-        
-	public String getTeny(){
-		return this.teny;
-	}
-	public void setTeny(String teny){
-		this.teny = teny;
-	}
-	public Double getCucu(){
-		return this.cucu;
-	}
-	public void setCucu(Double cucu){
-		this.cucu = cucu;
-	}
-	public String getId(){
-		return this.id;
-	}
-	public void setId(String id){
-		this.id = id;
-	}
+//GETTERS AND SETTERS
+    public Integer getId2() {
+        return id2;
+    }
+    public void setId2(Integer id2) {
+        this.id2 = id2;
+    }
+    public String getTeny2() {
+        return teny2;
+    }
+    public void setTeny2(String teny2) {
+        this.teny2 = teny2;
+    }
 
-    //CONSTRUCTORS
-
- 	public Test2(){}
-	public Test2(String teny, Double cucu, String id){
-		setTeny(teny);
-		setCucu(cucu);
-		setId(id);
-	}
-
+//CONSTRUCTOR
+    public Test2(){}
 }

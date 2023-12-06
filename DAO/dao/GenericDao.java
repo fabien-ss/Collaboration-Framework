@@ -41,15 +41,12 @@ public class GenericDao{
             else if(method.invoke(obj, (Object[]) null) == null && !method.equals(DaoUtility.getPrimaryKeyGetMethod(obj))){
                 query += "default";
             }
-            else if(returnParam.equals(java.sql.Date.class))
-            query += "TO_DATE('" + method.invoke(obj, (Object[]) null) + "', 'YYYY-MM-DD')";
             else
                 query += "'" + method.invoke(obj, (Object[]) null) + "'"; 
             query = query + ", ";
         }
         query = query.substring(0, query.lastIndexOf(','));
         query = query + ")";
-        // System.out.println(query);
         Statement stmt =  con.createStatement();
         stmt.executeUpdate(query);
         if( state == true) con.close();
@@ -79,7 +76,6 @@ public class GenericDao{
                 state = true;
             }
             String query = "DELETE FROM " + DaoUtility.getTableName(obj)+" WHERE " + DaoUtility.getPrimaryKeyName(obj)  +" = '" + id +"'";
-        // System.out.println(query);
             Statement stmt = con.createStatement();
             stmt.executeUpdate(query);
         }finally {
@@ -94,7 +90,6 @@ public class GenericDao{
                 state = true;
             }
             String query = "DELETE FROM " + DaoUtility.getTableName(obj) + " WHERE " + condition;
-            // System.out.println(query);
             Statement stmt = con.createStatement();
             stmt.executeUpdate(query);
         }finally {
@@ -112,13 +107,12 @@ public class GenericDao{
             }
             String query = "UPDATE "+ DaoUtility.getTableName(obj) +" SET ";
             List<Method> methods = DaoUtility.getAllGettersMethod(obj);
-            List<Field> fields = DaoUtility.getColumnFields(obj.getClass());
-            for( int i = 0; i < methods.size(); i++ ){
-                query += fields.get(i).getName() + " = '"+methods.get(i).invoke(obj, (Object[]) null)+"', ";
-            }
+            List<Field> fields = DaoUtility.getAllColumnFields(obj.getClass());
+            for( int i = 0; i < methods.size(); i++ )
+                query += DaoUtility.getName(fields.get(i)) + " = '"+methods.get(i).invoke(obj, (Object[]) null)+"', ";
             query = query.substring(0, query.lastIndexOf(','));
             query += " WHERE " + DaoUtility.getPrimaryKeyName(obj) +" = '" + DaoUtility.getPrimaryKeyGetMethod(obj).invoke( obj, (Object[]) null)+"'";
-            // System.out.println(query);
+            
             Statement stmt = con.createStatement();
             stmt.executeUpdate(query);
         }finally {
@@ -177,13 +171,12 @@ public class GenericDao{
         boolean state = false;
         try{
             if(con == null){
-                con = new DbConnection().connect();
+                con = DbConnection.connect();
                 state = true;
             }
             
             String condition = DaoUtility.getConditionByAttributeValue(obj);
             String query = "SELECT * FROM " + DaoUtility.getTableName(obj) + condition;
-            // System.out.println(query);
             List<T> lst = fetch(con, query, obj);
             return lst;
         }finally{
@@ -199,7 +192,6 @@ public class GenericDao{
                 state = true;
             }
             String query = "SELECT * FROM " + DaoUtility.getTableName(obj) + " WHERE " + condition;
-            // System.out.println(query);
             List<T>  lst = fetch(con, query, obj);
             return lst;
         }finally {
@@ -216,7 +208,6 @@ public class GenericDao{
                 state = true;
             }
             Statement stmt =  con.createStatement();
-            // System.out.println(query);
             stmt.executeUpdate(query);
         }finally {
             if(state == true) con.close();
@@ -232,7 +223,7 @@ public class GenericDao{
             List<T> list = new ArrayList<>();
             Statement stmt = con.createStatement();
             ResultSet rs = stmt.executeQuery(query);
-            List<Field> fields = DaoUtility.getColumnFields(obj.getClass());
+            List<Field> fields = DaoUtility.getAllColumnFields(obj.getClass());
             List<Method> methods = DaoUtility.getAllSettersMethod(obj);
             while( rs.next() ){
                 T now = convertToObject(con, rs, fields, methods, obj);
@@ -248,7 +239,7 @@ public class GenericDao{
         List<T> list = new ArrayList<>();
         Statement stmt = con.createStatement();
         ResultSet rs = stmt.executeQuery(query);
-        List<Field> fields = DaoUtility.getColumnFields(obj.getClass());
+        List<Field> fields = DaoUtility.getAllColumnFields(obj.getClass());
         List<Method> methods = DaoUtility.getAllSettersMethod(obj);
         while( rs.next() ){
             T now = convertToObject(con, rs, fields, methods, obj);
@@ -276,21 +267,6 @@ public class GenericDao{
         }
         return (T) object;
     }
-    
-    // private T convertToObject(ResultSet resultSet, List<Field> fields, List<Method> methods) throws Exception{
-    //     Object object = this.getClass().getDeclaredConstructor().newInstance();
-    //     for( int i = 0; i < fields.size() ; i++ ){
-    //         String name = DaoUtility.getName(fields.get(i));
-    //         Method method = methods.get(i);
-    //         Object value = resultSet.getObject(name);// , fields.get(i).getType());
-    //         if(value == null){
-    //             value = ObjectUtility.getPrimitiveDefaultValue(fields.get(i).getType());
-    //         }
-    //         System.out.println(name+" = "+value);
-    //         method.invoke(object, value);
-    //     }
-    //     return (T) object;
-    // }   
         
     public static  String constructPK(Connection con, Object obj)throws Exception{
         boolean state = false;
