@@ -5,6 +5,7 @@
 package utils;
 
 import annotation.Table;
+import dao.DbConnection;
 import annotation.Column;
 import annotation.PrimaryKey;
 
@@ -73,11 +74,12 @@ public class DaoUtility {
     }
     
     //COLUMN
-    public static List<Field> getColumnFields(Class objClass){
+    
+    public static List<Field> getColumnFields(Class<?> objClass) throws Exception{
         List<Field> lst = new ArrayList<>();
         while(objClass != Object.class){
             for(Field declaredField : objClass.getDeclaredFields()) {
-                if (declaredField.isAnnotationPresent(Column.class)) {
+                if(declaredField.isAnnotationPresent(Column.class)){
                     lst.add(declaredField);
                 }
             }
@@ -85,18 +87,26 @@ public class DaoUtility {
         }
             return lst;
     }
+    public static List<Field> getAllColumnFields(Object obj) throws Exception{
+        List<Field> lst = new ArrayList<>();
+        lst.add(getPrimaryKeyField(obj));
+        lst.addAll(getColumnFields(obj.getClass()));
+        return lst;
+    }
     
     public static String getName( Field field ){
-        if( field.isAnnotationPresent(Column.class) && !field.getAnnotation(Column.class).name().isEmpty() ){
+        if( field.isAnnotationPresent(Column.class) && !field.getAnnotation(Column.class).name().isEmpty() )
             return field.getAnnotation(Column.class).name();
-        }
+        else if(field.isAnnotationPresent(PrimaryKey.class) && !field.getAnnotation(PrimaryKey.class).name().isEmpty())
+            return field.getAnnotation(PrimaryKey.class).name();
         return field.getName();
     }
     
-    public static String[] getColumns(Object obj){
-        List<Field> lst = getColumnFields(obj.getClass());
+    public static String[] getColumns(Object obj) throws Exception{
+        List<Field> lst = getAllColumnFields(obj);
         String[] list = new String[lst.size()];
-        for(int i = 0; i < lst.size(); i++){
+        list[0] = getPrimaryKeyColumnName(obj);
+        for(int i = 1; i < list.length ; i++){
             Column col = lst.get(i).getAnnotation(Column.class);
             if(col.name().equals(""))
                 list[i] = ObjectUtility.capitalize( lst.get(i).getName());
@@ -106,36 +116,53 @@ public class DaoUtility {
         return list;
     }
 
-    public static List<String> getTableColumns(Connection con, String tableName) throws SQLException{
-        List<String> res = new ArrayList();
-        String query = "SELECT * FROM "+tableName;
-        
-        Statement stmt = con.createStatement();
-        ResultSet rs = stmt.executeQuery(query);
-        ResultSetMetaData rsmd = rs.getMetaData();
-        int count = rsmd.getColumnCount();
-        for(int i = 1; i <= count; i++){
-            res.add(rsmd.getColumnName(i));
+    public static List<String> getTableColumns(String tableName) throws Exception{
+        Connection con = null;
+        try{
+            con = DbConnection.connect();
+            List<String> res = new ArrayList<>();
+            String query = "SELECT * FROM "+tableName;
+            
+            Statement stmt = con.createStatement();
+            ResultSet rs = stmt.executeQuery(query);
+            ResultSetMetaData rsmd = rs.getMetaData();
+            int count = rsmd.getColumnCount();
+            for(int i = 1; i <= count; i++){
+                res.add(rsmd.getColumnName(i));
+            }
+            return res;
+        }finally{
+            con.close();
         }
-        return res;
     }
     
-    public static String getListColumns(Object obj){
+    public static String getListColumns(Object obj) throws Exception{
         String[] lst = getColumns(obj);
         String res = " ("; 
-        for(String elt : lst){
+        for(String elt : lst)
             res += elt+",";
-        }
         res = res.substring(0, res.lastIndexOf(','));
         return res+")";
     }
     
     //PRIMARY KEY
-    public static String getPrimaryKeyName(Object obj){
-        List<Field> lst = getColumnFields(obj.getClass());
+    public static String getPrimaryKeyName(Object obj) throws Exception{
+        Field[] lst = obj.getClass().getDeclaredFields();
         for(Field elt : lst){
             if(elt.isAnnotationPresent(PrimaryKey.class)){
-                Column col = elt.getAnnotation(Column.class);
+                PrimaryKey col = elt.getAnnotation(PrimaryKey.class);
+                if(col.name().equals(""))
+                    return elt.getName();
+                return col.name();
+            }
+        }
+        return "";
+    }
+    public static String getPrimaryKeyColumnName(Object obj) throws Exception{
+        Field[] lst = obj.getClass().getDeclaredFields();
+        for(Field elt : lst){
+            if(elt.isAnnotationPresent(PrimaryKey.class)){
+                PrimaryKey col = elt.getAnnotation(PrimaryKey.class);
                 if(col.name().equals(""))
                     return elt.getName();
                 return col.name();
@@ -144,15 +171,16 @@ public class DaoUtility {
         return "";
     }
     public static Method getPrimaryKeyGetMethod(Object obj) throws Exception{
-        List<Field> lst = getColumnFields(obj.getClass());
+        Field[] lst = obj.getClass().getDeclaredFields();
         for(Field elt : lst){
             if(elt.isAnnotationPresent(PrimaryKey.class))
                return obj.getClass().getDeclaredMethod("get" + ObjectUtility.capitalize(elt.getName()), (Class[]) null);
         }
         return null;
     }
+
     public static Method setPrimaryKey(Object obj) throws Exception{
-        List<Field> lst = getColumnFields(obj.getClass());
+        Field[] lst = obj.getClass().getDeclaredFields();
         for(Field elt : lst){
             if(elt.isAnnotationPresent(PrimaryKey.class))
                return obj.getClass().getDeclaredMethod("set" + ObjectUtility.capitalize(elt.getName()), elt.getType());
@@ -160,7 +188,7 @@ public class DaoUtility {
         return null;
     }
     public static Field getPrimaryKeyField(Object obj) throws Exception{
-        List<Field> lst = getColumnFields(obj.getClass());
+        Field[] lst = obj.getClass().getDeclaredFields();
         for(Field elt : lst){
             if(elt.isAnnotationPresent(PrimaryKey.class))
                 return elt;
@@ -180,41 +208,39 @@ public class DaoUtility {
         return lst;
     }
     //OTHERS (GETTERS AND SETTERS)
-    public static List<Method> getGettersMethod(Class obj) throws Exception{
-        List<Field> list = getColumnFields(obj);
+    public static List<Method> getGettersMethod(Class<?> objClass) throws Exception{
+        List<Field> list = getColumnFields(objClass);
         List<Method> res = new ArrayList<>();
         for(Field field : list){
-            if( field.getType().equals(boolean.class))
-               res.add(obj.getDeclaredMethod("is" + capitalize(field.getName()),  (Class[])null)); 
-            else
-                res.add(obj.getDeclaredMethod("get" + capitalize(field.getName()),  (Class[])null));
+            if(field.getType().equals(boolean.class))
+               res.add(objClass.getMethod("is" + capitalize(field.getName()),  (Class[])null)); 
+            else{
+                res.add(objClass.getMethod("get" + capitalize(field.getName()),  (Class[])null));
+            }
         }
         return res;
     }
     public static List<Method> getAllGettersMethod(Object obj) throws Exception{
-        Class objClass = obj.getClass();
+        Class<?> objClass = obj.getClass();
         List<Method> res = new ArrayList<>();
-        while(objClass != Object.class){
-            res.addAll(getGettersMethod(objClass));
-            objClass = objClass.getSuperclass();
-        }
+        res.add(getPrimaryKeyGetMethod(obj));
+        res.addAll(getGettersMethod(objClass));
+        objClass = objClass.getSuperclass();
         return res;
     }
-    public static List<Method> getSettersMethod(Class obj) throws Exception{
+    public static List<Method> getSettersMethod(Class<?> obj) throws Exception{
         List<Field> list = getColumnFields(obj);
         List<Method> res = new ArrayList<>();
         for(Field field : list)
-            res.add(obj.getDeclaredMethod("set" + capitalize(field.getName()), field.getType()));
+            res.add(obj.getMethod("set" + capitalize(field.getName()), field.getType()));
         return res;
     }
     public static List<Method> getAllSettersMethod(Object obj) throws Exception{
-        Class objClass = obj.getClass();
+        Class<?> objClass = obj.getClass();
         List<Method> res = new ArrayList<>();
-        while(objClass != Object.class){
-            res.addAll(getSettersMethod(objClass));
-            // System.out.println(res);
-            objClass = objClass.getSuperclass();
-        }
+        res.add(setPrimaryKey(obj));
+        res.addAll(getSettersMethod(objClass));
+        objClass = objClass.getSuperclass();
         return res;
     }
     
@@ -223,9 +249,9 @@ public class DaoUtility {
         return rsmd.getColumnCount();
     }
     
-    public static HashMap<String, Class> getColumnNameAndType(ResultSet rs) throws Exception{
-        HashMap<String, Class> map = new HashMap<>();
-        HashMap<Integer, Class> mapping = ClassMapping.getClassMapTable();
+    public static HashMap<String, Class<?>> getColumnNameAndType(ResultSet rs) throws Exception{
+        HashMap<String, Class<?>> map = new HashMap<>();
+        HashMap<Integer, Class<?>> mapping = ClassMapping.getClassMapTable();
         
         ResultSetMetaData rsmd = rs.getMetaData();
         int count = rsmd.getColumnCount();

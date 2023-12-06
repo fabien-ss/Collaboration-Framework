@@ -4,7 +4,9 @@
  */
 package parser;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -30,4 +32,19 @@ public class FileParser {
         myReader.close();
         return res;
     }
+
+    public static String[] listAllFiles(String path){
+        File file = new File(path);
+        return file.list();
+     }
+     
+     public static String readOneFile(String path) throws Exception{
+         StringBuilder builder = new StringBuilder();
+         BufferedReader reader = new BufferedReader(new FileReader(path));
+         String line;
+         while((line = reader.readLine()) != null){
+             builder.append(line).append("\n");
+         }
+         return builder.toString();
+     }
 }

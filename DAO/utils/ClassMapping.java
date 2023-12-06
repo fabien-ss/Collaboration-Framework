@@ -13,8 +13,8 @@ import java.sql.Date;
  */
 public class ClassMapping {
     
-    public static HashMap<String, Class> getClassMap(){
-        HashMap<String, Class> mapping = new HashMap<>();
+    public static HashMap<String, Class<?>> getClassMap(){
+        HashMap<String, Class<?>> mapping = new HashMap<>();
         
         mapping.put("int", Integer.class);
         mapping.put("Integer", Integer.class);
@@ -30,8 +30,8 @@ public class ClassMapping {
         return mapping;
     } 
     
-    public static HashMap<Integer, Class> getClassMapTable(){
-        HashMap<Integer, Class> mapping = new HashMap<>();
+    public static HashMap<Integer, Class<?>> getClassMapTable(){
+        HashMap<Integer, Class<?>> mapping = new HashMap<>();
         
         mapping.put(4, Integer.class);
         mapping.put(-5, Integer.class);
