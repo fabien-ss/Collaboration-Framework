@@ -166,7 +166,8 @@ public class BddObject  {
         boolean state = false;
         if(con == null){
             con = DbConnection.connect();
-            state = true;
+            state = 
+            true;
         }
         String query = "SELECT * FROM " + tableName;
         List<T> list = this.fetch(con, query);
