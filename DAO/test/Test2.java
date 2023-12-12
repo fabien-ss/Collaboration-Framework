@@ -26,5 +26,5 @@ public class Test2 extends Test{
     }
 
 //CONSTRUCTOR
-    public Test2(){}
+    public Test2() throws Exception{}
 }

@@ -18,7 +18,6 @@ import static utils.ObjectUtility.capitalize;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.HashMap;
 /**
@@ -85,8 +84,9 @@ public class DaoUtility {
             }
             objClass = objClass.getSuperclass();
         }
-            return lst;
+        return lst;
     }
+    
     public static List<Field> getAllColumnFields(Object obj) throws Exception{
         List<Field> lst = new ArrayList<>();
         lst.add(getPrimaryKeyField(obj));
@@ -134,6 +134,20 @@ public class DaoUtility {
         }finally{
             con.close();
         }
+    }
+    
+
+    public static List<String> getTableColumns(Connection con, String tableName) throws Exception{
+        List<String> res = new ArrayList<>();
+        String query = "SELECT * FROM "+tableName;
+        Statement stmt = con.createStatement();
+        ResultSet rs = stmt.executeQuery(query);
+        ResultSetMetaData rsmd = rs.getMetaData();
+        int count = rsmd.getColumnCount();
+        for(int i = 1; i <= count; i++){
+            res.add(rsmd.getColumnName(i));
+        }
+        return res;
     }
     
     public static String getListColumns(Object obj) throws Exception{
@@ -190,6 +204,7 @@ public class DaoUtility {
     public static Field getPrimaryKeyField(Object obj) throws Exception{
         Field[] lst = obj.getClass().getDeclaredFields();
         for(Field elt : lst){
+            // System.out.println(elt);
             if(elt.isAnnotationPresent(PrimaryKey.class))
                 return elt;
         }

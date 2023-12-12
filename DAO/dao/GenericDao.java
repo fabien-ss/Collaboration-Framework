@@ -29,7 +29,7 @@ public class GenericDao{
             con = DbConnection.connect();
             state = true;
         }
-        String query = "INSERT INTO "+DaoUtility.getTableName(obj)+DaoUtility.getListColumns(obj)+" VALUES (";
+        String query = "INSERT INTO "+ DaoUtility.getTableName(obj) + DaoUtility.getListColumns(obj)  + " VALUES (";
         List<Method> lst = DaoUtility.getAllGettersMethod(obj);
         for(Method method : lst){
             Class<?> returnParam = method.getReturnType();
@@ -47,6 +47,7 @@ public class GenericDao{
         }
         query = query.substring(0, query.lastIndexOf(','));
         query = query + ")";
+        System.out.println(query);
         Statement stmt =  con.createStatement();
         stmt.executeUpdate(query);
         if( state == true) con.close();
@@ -107,7 +108,7 @@ public class GenericDao{
             }
             String query = "UPDATE "+ DaoUtility.getTableName(obj) +" SET ";
             List<Method> methods = DaoUtility.getAllGettersMethod(obj);
-            List<Field> fields = DaoUtility.getAllColumnFields(obj.getClass());
+            List<Field> fields = DaoUtility.getAllColumnFields(obj);
             for( int i = 0; i < methods.size(); i++ )
                 query += DaoUtility.getName(fields.get(i)) + " = '"+methods.get(i).invoke(obj, (Object[]) null)+"', ";
             query = query.substring(0, query.lastIndexOf(','));
@@ -127,7 +128,7 @@ public class GenericDao{
                 con = DbConnection.connect();
                 state = true;
             }
-            String query = "SELECT * FROM " + DaoUtility.getTableName(obj);
+            String query = "SELECT * FROM " + DaoUtility.getTableName(obj); 
             List<T> list = fetch(con, query, obj);
             return list;
         }finally {
@@ -184,7 +185,7 @@ public class GenericDao{
         }
     }
     
-    public static <T> List<T>  findWhere(Connection con, String condition, Object obj) throws Exception {
+    public static <T> List<T> findWhere(Connection con, String condition, Object obj) throws Exception {
         boolean state = false;
         try{
             if(con == null){
@@ -223,10 +224,11 @@ public class GenericDao{
             List<T> list = new ArrayList<>();
             Statement stmt = con.createStatement();
             ResultSet rs = stmt.executeQuery(query);
-            List<Field> fields = DaoUtility.getAllColumnFields(obj.getClass());
+            List<Field> fields = DaoUtility.getAllColumnFields(obj);
             List<Method> methods = DaoUtility.getAllSettersMethod(obj);
+            List<String> columns = DaoUtility.getTableColumns(con, DaoUtility.getTableName(obj));
             while( rs.next() ){
-                T now = convertToObject(con, rs, fields, methods, obj);
+                T now = convertToObject(con, rs, fields, methods, obj, columns);
                 list.add(now);
             }
             return list;
@@ -239,25 +241,24 @@ public class GenericDao{
         List<T> list = new ArrayList<>();
         Statement stmt = con.createStatement();
         ResultSet rs = stmt.executeQuery(query);
-        List<Field> fields = DaoUtility.getAllColumnFields(obj.getClass());
+        List<Field> fields = DaoUtility.getAllColumnFields(obj);
         List<Method> methods = DaoUtility.getAllSettersMethod(obj);
+        List<String> columns = DaoUtility.getTableColumns(con, DaoUtility.getTableName(obj));
         while( rs.next() ){
-            T now = convertToObject(con, rs, fields, methods, obj);
+            T now = convertToObject(con, rs, fields, methods, obj, columns);
             list.add(now);
         }
         return list;
     }
     
     @SuppressWarnings("unchecked")
-    private static <T> T convertToObject(Connection con, ResultSet resultSet, List<Field> fields, List<Method> methods, Object obj) throws Exception{
+    private static <T> T convertToObject(Connection con, ResultSet resultSet, List<Field> fields, List<Method> methods, Object obj, List<String> columns) throws Exception{
         Object object = obj.getClass().getDeclaredConstructor().newInstance();
-        List<String> columns = DaoUtility.getTableColumns(con, DaoUtility.getTableName(object));
         for (String column : columns) {
             for( int i = 0; i < fields.size() ; i++ ){
-                if(fields.get(i).getName().equals(ObjectUtility.formatString(column))){
-                    String name = DaoUtility.getName(fields.get(i));
+                if(DaoUtility.getName(fields.get(i)).equals(column)){   
                     Method method = methods.get(i);
-                    Object value = resultSet.getObject(name); //, fields.get(i).getType());
+                    Object value = resultSet.getObject(column);
                     if(value == null){
                         value = ObjectUtility.getPrimitiveDefaultValue(fields.get(i).getType());
                     }

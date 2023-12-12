@@ -7,6 +7,7 @@ import java.sql.Timestamp;
 import java.util.List;
 
 import dao.DbConnection;
+import dao.GenericDao;
 
 public class Main {
    public static void main(String[] args) throws SQLException{
@@ -32,18 +33,24 @@ public class Main {
             // testInsert.update(con);
             // System.out.println("updated succesfully");
 
-            Test2 test2 = new Test2();
-            test2.setTeny("Teny");
-            test2.setTeny2("Teny 2");
-            test2.setDateInsert(Date.valueOf("2023-12-06"));
-            test2.setDateHeure(Timestamp.valueOf("2023-12-06 08:00:00"));
-            test2.save(con);
-            System.out.println("saved succesfully");
+            // Test2 test2 = new Test2();
+            // test2.setTeny("Teny");
+            // test2.setTeny2("Teny 2");
+            // test2.setDateInsert(Date.valueOf("2023-12-06"));
+            // test2.setDateHeure(Timestamp.valueOf("2023-12-06 08:00:00"));
+            // test2.save(con);
+            // System.out.println("saved succesfully");
 
             // List<Test2> list2 = test2.findAll(con);
             // for (Test2 test : list2) {
-            //     System.out.println(test.getId() + " " + test.getTeny() + " " + test.getDateInsert());
-            // }
+            //     System.out.println(test.getId2() + " " + test.getTeny() + " " + test.getDateInsert());
+            // }   
+
+            System.out.println("HOHOHOHOHO");
+            List<Test3> lstTest = GenericDao.findAll(con, new Test3());
+            for (Test3 test : lstTest) {
+                System.out.println(test.getTeny3());
+            }
 
             
         } catch (Exception e) {

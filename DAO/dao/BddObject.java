@@ -23,86 +23,24 @@ import utils.ObjectUtility;
  * @param <T>
  */ 
 public class BddObject  {
-    List<Field> columnFields;
-    List<Method> getters;
-    List<Method> setters;
-    List<String> columns;
-    Method primaryKeyGetter;
     String tableName;
-    String primaryKeyName;
 
     //GETTERS & SETTERS
-    
-    public List<Field> getColumnFields() {
-        return columnFields;
+    public String getTableName(){
+        return this.tableName;
     }
-
-    public void setColumnFields(List<Field> columnFields) {
-        this.columnFields = columnFields;
-    }
-
-    public List<Method> getGetters() {
-        return getters;
-    }
-
-    public void setGetters(List<Method> getters) {
-        this.getters = getters;
-    }
-
-    public Method getPrimaryKeyGetter(){
-        return this.primaryKeyGetter;
-    }
-
-    public void setPrimaryKeyGetter(Method method){
-        this.primaryKeyGetter = method;
-    }
-
-    public List<Method> getSetters() {
-        return setters;
-    }
-
-    public void setSetters(List<Method> setters) {
-        this.setters = setters;
-    }
-
-    public String getTableName() {
-        return tableName;
-    }
-
-    public void setTableName(String tableName) {
+    public void setTableName(String tableName){
         this.tableName = tableName;
     }
 
-    public String getPrimaryKeyName() {
-        return primaryKeyName;
-    }
-
-    public void setPrimaryKeyName(String primaryKeyName) {
-        this.primaryKeyName = primaryKeyName;
-    }
-    
-    public List<String> getColumns() {
-        return columns;
-    }
-
-    public void setColumns(List<String> columns) {
-        this.columns = columns;
-    }
-
     //CONSTRUCTOR
-    public BddObject() throws Exception{
+    public BddObject(){
         init();
     }
 
     //METHODS
-    public void init() throws Exception{
-        this.setColumnFields(DaoUtility.getAllColumnFields(this)); 
-        this.setGetters(DaoUtility.getAllGettersMethod(this));
-        this.setSetters(DaoUtility.getAllSettersMethod(this));
-        this.setPrimaryKeyName(this.getPrimaryKeyName());
-        this.setPrimaryKeyGetter(this.getPrimaryKeyGetter());
-        this.setTableName(this.getTableName());
-        this.setColumns(DaoUtility.getTableColumns(this.getTableName()));
+    public void init(){
+        this.setTableName(DaoUtility.getTableName(this));
     }
 
     //INSERT 
@@ -114,13 +52,13 @@ public class BddObject  {
                 state = true;
             }
             String query = "INSERT INTO " + this.getTableName() + DaoUtility.getListColumns(this)+" VALUES (";
-            List<Method> lst = this.getGetters();
+            List<Method> lst = DaoUtility.getAllGettersMethod(this);
             System.out.println(lst);
             for(Method method : lst){
                 Class<?> returnParam = method.getReturnType();
-                if(method.equals(this.getPrimaryKeyGetter()) && method.invoke(this, (Object[]) null) == null && returnParam.equals(String.class)){
+                if(method.equals(DaoUtility.getPrimaryKeyGetMethod(this)) && method.invoke(this, (Object[]) null) == null && returnParam.equals(String.class)){
                     query += "'" + constructPK(con) + "'";  
-                }else if(method.equals(this.getPrimaryKeyGetter()) && method.invoke(this, (Object[]) null) == null && returnParam.equals(Integer.class)){
+                }else if(method.equals(DaoUtility.getPrimaryKeyGetMethod(this)) && method.invoke(this, (Object[]) null) == null && returnParam.equals(Integer.class)){
                     query += constructPK(con);
                 }
                 else if(method.invoke(this, (Object[]) null) == null){
@@ -147,7 +85,7 @@ public class BddObject  {
                 con = DbConnection.connect();
                 state = true;
             }
-            String query = "DELETE FROM " + this.getTableName() +" WHERE " + this.getPrimaryKeyName()  + " = '" + this.getPrimaryKeyGetter().invoke(this, (Object[]) null) + "'" ;
+            String query = "DELETE FROM " + this.getTableName() +" WHERE " + DaoUtility.getPrimaryKeyName(this)  + " = '" + DaoUtility.getPrimaryKeyGetMethod(this).invoke(this, (Object[]) null) + "'" ;
         //    System.out.println(query);
             Statement stmt = con.createStatement();
             stmt.executeUpdate(query);
@@ -162,7 +100,7 @@ public class BddObject  {
                 con = DbConnection.connect();
                 state = true;
             }
-            String query = "DELETE FROM " + this.getTableName() +" WHERE " + this.getPrimaryKeyName()  +" = '" + id +"'";
+            String query = "DELETE FROM " + this.getTableName() +" WHERE " + DaoUtility.getPrimaryKeyName(this)  +" = '" + id +"'";
             // System.out.println(query);
             Statement stmt = con.createStatement();
             stmt.executeUpdate(query);
@@ -194,12 +132,12 @@ public class BddObject  {
                 state = true;
             }
             String query = "UPDATE "+ this.getTableName() +" SET ";
-            List<Method> methods = this.getGetters();
-            List<Field> fields = this.getColumnFields();
+            List<Method> methods = DaoUtility.getAllGettersMethod(this);
+            List<Field> fields = DaoUtility.getAllColumnFields(this);
             for( int i = 0; i < methods.size(); i++ )
                 query += DaoUtility.getName(fields.get(i)) + " = '" + methods.get(i).invoke(this, (Object[]) null) + "', ";
             query = query.substring(0, query.lastIndexOf(','));
-            query += " WHERE " + this.getPrimaryKeyName() +" = '" + this.getPrimaryKeyGetter().invoke( this, (Object[]) null)+"'";
+            query += " WHERE " + DaoUtility.getPrimaryKeyName(this) +" = '" + DaoUtility.getPrimaryKeyGetMethod(this).invoke( this, (Object[]) null)+"'";
             // System.out.println(query);
             Statement stmt = con.createStatement();
             stmt.executeUpdate(query);
@@ -243,7 +181,23 @@ public class BddObject  {
                 con = DbConnection.connect();
                 state = true;
             }
-            String query = "SELECT * FROM " + this.getTableName() + " WHERE " + this.getPrimaryKeyName() + " = '" + id + "'";
+            String query = "SELECT * FROM " + this.getTableName() + " WHERE " + DaoUtility.getPrimaryKeyName(this) + " = '" + id + "'";
+            T obj = (T) this.fetch(con, query).get(0);
+            // System.out.println(query);
+            return (T) obj;
+        }
+        finally {
+            if(state == true) con.close();
+        }
+    }
+    public <T> T findById(Connection con)throws Exception{
+        boolean state = false;
+        try{
+            if(con == null){
+                con = DbConnection.connect();
+                state = true;
+            }
+            String query = "SELECT * FROM " + this.getTableName() + " WHERE " + DaoUtility.getPrimaryKeyName(this) + " = '" + DaoUtility.getPrimaryKeyGetMethod(this).invoke(this, (Object[])null) + "'";
             T obj = (T) this.fetch(con, query).get(0);
             // System.out.println(query);
             return (T) obj;
@@ -309,15 +263,16 @@ public class BddObject  {
             List<T> list = new ArrayList<>();
             Statement stmt = con.createStatement();
             ResultSet rs = stmt.executeQuery(query);
-            List<Field> fields = this.getColumnFields();
-            List<Method> methods = this.getSetters();
+            List<Field> fields = DaoUtility.getAllColumnFields(this);
+            List<Method> methods = DaoUtility.getAllSettersMethod(this);
+            List<String> columns = DaoUtility.getTableColumns(this.getTableName());
             while( rs.next() ){
-                T now = this.convertToObject(con, rs, fields, methods, obj);
+                T now = this.convertToObject(con, rs, fields, methods, obj, columns);
                 list.add(now);
             }
             return list;
         }finally {
-                if(state == true) con.close();
+            if(state == true) con.close();
         }
     }
     
@@ -325,22 +280,21 @@ public class BddObject  {
         List<T> list = new ArrayList<>();
         Statement stmt = con.createStatement();
         ResultSet rs = stmt.executeQuery(query);
-        List<Field> fields = this.getColumnFields();
-        List<Method> methods = this.getSetters();
+        List<Field> fields = DaoUtility.getAllColumnFields(this);
+        List<Method> methods = DaoUtility.getAllSettersMethod(this);
+        List<String> columns = DaoUtility.getTableColumns(this.getTableName());
         while( rs.next() ){
-            T now = this.convertToObject(con, rs, fields, methods);
+            T now = this.convertToObject(con, rs, fields, methods, columns);
             list.add(now);
         }
         return list;
     }
     
-    private <T> T convertToObject(Connection con, ResultSet resultSet, List<Field> fields, List<Method> methods, Object obj) throws Exception{
+    private <T> T convertToObject(Connection con, ResultSet resultSet, List<Field> fields, List<Method> methods, Object obj, List<String> columns) throws Exception{
         Object object = obj.getClass().getDeclaredConstructor().newInstance();
-        List<String> columns = this.getColumns();
         for (String column : columns) {
             for( int i = 0; i < fields.size() ; i++ ){
                 if(DaoUtility.getName(fields.get(i)).equals(column)){
-                    // String name = DaoUtility.getName(fields.get(i));
                     Method method = methods.get(i);
                     Object value = resultSet.getObject(column);
                     if(value == null){
@@ -353,9 +307,8 @@ public class BddObject  {
         return (T) object;
     }
     
-    private <T>  T convertToObject(Connection con, ResultSet resultSet, List<Field> fields, List<Method> methods) throws Exception{
-        Object object = this.getClass().getDeclaredConstructor().newInstance();        
-        List<String> columns = this.getColumns();
+    private <T>  T convertToObject(Connection con, ResultSet resultSet, List<Field> fields, List<Method> methods, List<String> columns) throws Exception{
+        Object object = this.getClass().getDeclaredConstructor().newInstance(); 
         for (String column : columns) {
             for( int i = 0; i < fields.size() ; i++ ){
                 if(DaoUtility.getName(fields.get(i)).equals(column)){
