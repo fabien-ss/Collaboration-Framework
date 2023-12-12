@@ -49,7 +49,7 @@ public class Test extends BddObject{
 	}
     //CONSTRUCTORS
 
- 	public Test(){}
+ 	public Test() throws Exception{}
 
 
 }

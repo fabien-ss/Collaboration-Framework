@@ -9,3 +9,11 @@ CREATE table test2 (
     teny VARCHAR(50),
     cucu DOUBLE PRECISION
 );
+CREATE table test3 (
+    id_3 SERIAL PRIMARY KEY,
+    teny_3 VARCHAR(50)
+);
+INSERT INTO test3 VALUES
+    (default, 'hohoho'),
+    (default, 'huhuhu'),
+    (default, 'hahaha');
